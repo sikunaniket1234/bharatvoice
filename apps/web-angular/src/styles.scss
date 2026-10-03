@@ -1,0 +1,6 @@
+* { box-sizing: border-box; }
+html { min-width: 320px; scroll-behavior: smooth; }
+body { min-width: 320px; min-height: 100vh; margin: 0; font-family: 'Figtree', 'Noto Sans Oriya', 'Noto Sans Devanagari', 'Segoe UI', sans-serif; }
+button, textarea, input, select { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+::selection { background: #ead6ad; color: #252722; }

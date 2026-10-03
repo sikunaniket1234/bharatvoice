@@ -2,7 +2,7 @@
 
 **An Odia-first multilingual communication platform.** BharatVoice is being built to help people translate, speak, listen, and communicate across Odia, Hindi, and English—with Odia treated as a first-class language.
 
-> **Project status:** early development. The original standalone HTML prototype and the first API foundation are in this repository. Neural translation models and the Angular application are not integrated yet; the translation API deliberately reports “not ready” instead of returning made-up translations.
+> **Project status:** early development. The Angular PWA and three-service Docker development stack are implemented. Neural translation models are not integrated yet; the translation API deliberately reports “not ready” instead of returning made-up translations.
 
 ## Contents
 
@@ -25,14 +25,14 @@
 
 | Capability | Phase 1 scope | Current state |
 | --- | --- | --- |
-| Text translation | English ↔ Odia and English ↔ Hindi | API contract and gateway are implemented; IndicTrans2 is not connected yet |
+| Text translation | English ↔ Odia and English ↔ Hindi | Angular-to-API flow is connected; IndicTrans2 is not connected yet |
 | Language identification | English, Odia, Hindi | Planned |
-| Speech to text | English, Odia, Hindi | Planned; IndicConformer is the intended provider |
-| Text to speech | Supported Phase 1 languages | Planned; AI4Bharat Indic-TTS is the initial candidate |
+| Speech to text | English, Odia, Hindi | Browser speech-recognition UI is present where supported; IndicConformer is not connected |
+| Text to speech | Supported Phase 1 languages | Browser speech playback UI is present where supported; Indic-TTS is not connected |
 | Speech translation | Speech → text → translation → speech | Planned after the individual providers work |
 | Transliteration | Roman/native-script conversion, beta | Planned; IndicXlit is the initial candidate |
-| Translation history | View, copy, replay, delete | Prototype behavior only; persistence is not implemented |
-| Turn-based conversation | Two speakers, two languages | Prototype behavior only; real translation is not implemented |
+| Translation history | View, copy, replay, delete | Stored locally in this browser after successful model translations |
+| Turn-based conversation | Two speakers, two languages | Angular UI sends turns to the API; requires desktop model for translation |
 
 **Odia ↔ Hindi direct translation is excluded from Phase 1.** It is reserved for Phase 2. The API validates the four permitted Phase 1 directions and rejects unsupported pairs.
 
@@ -45,8 +45,8 @@
 - **FastAPI AI service:** health/readiness endpoints, validated Phase 1 translation schema, provider protocol, and an unconfigured IndicTrans2 provider boundary.
 - **NestJS API:** local gateway, request validation, translation forwarding, and health endpoint.
 - **Translation models:** not downloaded or connected. Until the desktop inference milestone, valid translation calls return HTTP 503 with `translation_provider_not_ready`.
-- **Frontend:** original HTML prototype only; Angular PWA migration is tracked in [TASKS.md](TASKS.md).
-- **Persistence, accounts, speech models, Docker deployment, and public pilot:** not implemented.
+- **Frontend:** Angular PWA with translation, speech tools, local history, conversation, transliteration preview, and light/dark themes; original prototype is retained as reference.
+- **Persistence/accounts, AI speech models, database, and public pilot:** not implemented. Docker Compose runs the local web, gateway, and AI API containers.
 
 This separation keeps the laptop useful for application and contract work without pretending that its CPU is the planned AI benchmark environment.
 
@@ -54,7 +54,7 @@ This separation keeps the laptop useful for application and contract work withou
 
 ```mermaid
 flowchart LR
-	Browser[Angular PWA - planned] --> Gateway[NestJS API]
+	Browser[Angular PWA] --> Gateway[NestJS API]
 	Gateway --> AI[FastAPI AI service]
 	AI --> Provider[TranslationProvider interface]
 	Provider -. desktop milestone .-> Indic[IndicTrans2]
@@ -64,7 +64,7 @@ flowchart LR
 
 ### Service responsibilities
 
-- **Angular PWA (planned):** user interface, browser audio capture/playback, and installable app experience.
+- **Angular PWA:** user interface, browser audio capture/playback where supported, installable app manifest, and cached application shell.
 - **NestJS:** application-facing REST API, validation, authentication, business rules, and eventually history/rate limiting.
 - **FastAPI:** AI request contracts, orchestration, model lifecycle, and inference providers.
 - **IndicTrans2:** authoritative translation provider. Gemma may later normalize or route validated input; it must not silently replace IndicTrans2 as the translator.
@@ -75,6 +75,7 @@ flowchart LR
 
 ```text
 apps/
+	web-angular/         Angular PWA
 	api-nestjs/          NestJS application gateway
 services/
 	ai-fastapi/          FastAPI AI service and provider boundaries
@@ -85,7 +86,7 @@ BharatVoice prototype.html
 											Original UI prototype/reference
 ```
 
-The Angular app, shared-contract package, and deployment stack will be added when their initial implementation starts. Model weights, caches, generated output, Python environments, and Node dependencies are intentionally excluded from Git.
+The shared-contract package and production deployment stack will be added when their implementation starts. Model weights, caches, generated output, Python environments, and Node dependencies are intentionally excluded from Git.
 
 ## Laptop setup
 
@@ -97,7 +98,7 @@ The laptop is the application/UI development and API-testing machine. The deploy
 - Python 3.12
 - Node.js 20 or newer and npm (the checked laptop currently has Node.js 24)
 - Git
-- Optional for later container work: Docker Desktop with Docker Compose enabled
+- Docker Desktop with Docker Compose enabled for the recommended stack
 
 The checked laptop has Python 3.12.10, npm 11.11.1, Docker CLI 29.3.1, and Docker Compose v5.1.1. Docker CLI presence does not by itself mean Docker Desktop/the daemon is running.
 
@@ -110,6 +111,29 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r services/ai-fastapi/requirements.txt
 npm ci
 ```
+
+### Start the Docker app
+
+Docker Desktop with Linux containers is running on this laptop. From the repository root, build and launch the web app and APIs:
+
+```powershell
+docker compose up --build -d
+docker compose ps
+```
+
+Open **http://127.0.0.1:4200**. Nginx serves the production Angular PWA and proxies `/api/` internally to NestJS. The gateway is also available at **http://127.0.0.1:3000**. FastAPI is intentionally private to the Compose network and is not published on a host port. Only web/API ports bind to loopback.
+
+Useful operations:
+
+```powershell
+docker compose logs -f web api ai
+docker compose up --build -d web
+docker compose down
+```
+
+The web container serves a production build. Rebuild it after editing Angular files. The named Node modules volume persists between runs; `docker compose down -v` removes it and should only be used if you intend to discard that cache.
+
+Translation currently returns HTTP 503 `translation_provider_not_ready` until the desktop IndicTrans2 provider is implemented. This is expected; it prevents sample phrases from being presented as model output.
 
 Optional local settings are documented in [.env.example](.env.example). NestJS loads the root `.env` when present. Never put real credentials, tokens, private audio, or model weights in committed files.
 
@@ -126,6 +150,14 @@ Start the NestJS gateway in **PowerShell terminal 2**:
 ```powershell
 npm run api:dev
 ```
+
+Start the Angular development server in **PowerShell terminal 3**:
+
+```powershell
+npm run web:dev
+```
+
+Open `http://127.0.0.1:4200`. The Angular development proxy forwards `/api` to NestJS on port 3000. Each service binds to loopback when run directly.
 
 Both services bind to loopback by default; they are intended for local development, not direct network/public access.
 
@@ -167,10 +199,12 @@ Run from the repository root:
 npm run api:build
 npm run api:test
 .\.venv\Scripts\python.exe -m pytest services/ai-fastapi
-npm audit
+npm run web:build
+npm run web:test
+npm audit --omit=dev
 ```
 
-The initial test suite covers the FastAPI health endpoint, Phase 1 pair validation, blank input rejection, the explicit missing-model response, and NestJS gateway behavior. Tests do not download model weights or test translation quality.
+The test suite covers Angular rendering/pair rules, FastAPI health and request validation, explicit missing-model behavior, and NestJS gateway behavior. Tests do not download model weights or test translation quality. Production dependencies currently pass `npm audit --omit=dev`; the full frontend development-tool tree still has advisories tracked in [TASKS.md](TASKS.md).
 
 ## Desktop AI handoff
 
@@ -188,7 +222,7 @@ Recommended order:
 
 ## Deployment and security
 
-The laptop workflow is private/local. The deployment guide recommends the desktop as the initial AI host and Ubuntu Server 24.04 LTS as the preferred long-term host OS; Windows is supported for development. The full Docker Compose deployment is future work and is not currently included.
+The laptop workflow is private/local. Docker Compose currently runs the Angular/Nginx web service, NestJS gateway, and FastAPI AI API without model weights. The deployment guide recommends the desktop as the initial AI host and Ubuntu Server 24.04 LTS as the preferred long-term host OS; Windows is supported for development.
 
 For a later family/private pilot, the supplied deployment plan recommends an outbound Cloudflare Tunnel rather than router port-forwarding. Before exposing anything, the project still needs authentication, HTTPS, rate limiting, monitoring/log rotation, database backups and restore tests, and an explicit audio-retention policy. Never expose PostgreSQL, Redis, or inference services directly to the Internet. A home desktop is not a highly available production server.
 
@@ -211,4 +245,4 @@ Model and dataset licenses must be tracked separately. Check the specific checkp
 5. Update [TASKS.md](TASKS.md) when work changes state and [HISTORY.md](HISTORY.md) for meaningful milestones.
 6. Keep laptop-specific and desktop-specific instructions in [LAPTOP.md](LAPTOP.md) and [DESKTOP.md](DESKTOP.md), respectively.
 
-The current Git branch is `main`. The project remote is `https://github.com/sikunaniket1234/bharatvoice.git`; pull on the desktop only after the reviewed commit has been pushed.
+The current Git branch is `main`. The project remote is `https://github.com/sikunaniket1234/bharatvoice.git`; laptop implementation changes are not available to the desktop until committed and pushed.

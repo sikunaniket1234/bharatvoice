@@ -1,0 +1,50 @@
+name: bharatvoice
+services:
+  ai:
+    build:
+      context: .
+      dockerfile: services/ai-fastapi/Dockerfile
+    environment:
+      PYTHONPATH: /workspace/services/ai-fastapi
+    command: uvicorn app.main:app --app-dir /workspace/services/ai-fastapi --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./services/ai-fastapi:/workspace/services/ai-fastapi
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api-nestjs/Dockerfile
+    environment:
+      AI_SERVICE_URL: http://ai:8000
+      API_HOST: 0.0.0.0
+      PORT: 3000
+      WEB_ORIGINS: http://localhost:4200,http://127.0.0.1:4200
+    command: npm run api:dev
+    volumes:
+      - ./apps/api-nestjs:/workspace/apps/api-nestjs
+      - api_node_modules:/workspace/node_modules
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      ai:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-angular/Dockerfile
+    ports:
+      - "127.0.0.1:4200:80"
+    depends_on:
+      - api
+
+volumes:
+  api_node_modules:

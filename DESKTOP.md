@@ -8,7 +8,7 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 
 ## First pull from laptop
 
-1. Clone the repository or pull the pushed laptop milestone from `origin/main`.
+1. Pull the latest committed laptop milestone from `origin/main` (the Angular PWA and Compose work is ready locally but awaits its implementation commit/push).
 2. Check out the recorded commit and read [README.md](README.md), [TASKS.md](TASKS.md), [LAPTOP.md](LAPTOP.md), this file and the three supplied source documents before changing architecture.
 3. Install project dependencies using the repository lockfiles; do not install/download model weights into the repository.
 4. Verify API tests and the CPU-only/not-ready path before configuring GPU inference.
@@ -35,5 +35,6 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 
 - Git remote: `https://github.com/sikunaniket1234/bharatvoice.git` (`origin`).
 - Branch: `main`; initial project commit: `9b3ee623eee7c9b850bd64aeed52ed38ef26cc5c`.
+- Latest laptop frontend/Compose implementation commit: pending laptop commit and push.
 - Desktop OS/driver/GPU runtime measurements: pending desktop inspection.
 - Model benchmark results: pending.

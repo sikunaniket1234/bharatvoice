@@ -2,11 +2,15 @@
   "name": "bharatvoice",
   "private": true,
   "workspaces": [
-    "apps/api-nestjs"
+    "apps/api-nestjs",
+    "apps/web-angular"
   ],
   "scripts": {
     "api:dev": "npm --workspace apps/api-nestjs run start:dev",
     "api:build": "npm --workspace apps/api-nestjs run build",
-    "api:test": "npm --workspace apps/api-nestjs run test"
+    "api:test": "npm --workspace apps/api-nestjs run test",
+    "web:dev": "npm --workspace apps/web-angular run start -- --host 127.0.0.1",
+    "web:build": "npm --workspace apps/web-angular run build",
+    "web:test": "npm --workspace apps/web-angular run test -- --watch=false"
   }
 }

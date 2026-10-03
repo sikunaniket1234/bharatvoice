@@ -9,9 +9,13 @@ Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` wa
 - [x] Add FastAPI health/readiness endpoints and a replaceable `TranslationProvider` boundary.
 - [x] Add NestJS gateway validation and forwarding to FastAPI.
 - [x] Add API contract/unit tests; a missing model returns an explicit not-ready error, never fake a translation.
-- [ ] Migrate the HTML prototype into the Angular PWA and connect its translation flow to NestJS.
+- [x] Migrate the prototype's main language tools into an Angular PWA and connect translation/conversation flows to NestJS.
+- [x] Add local Docker Compose services for Angular/Nginx, NestJS, and FastAPI with loopback-only web/API ports.
 - [x] Add local environment examples with safe non-secret defaults; keep actual secrets/model paths untracked.
 - [x] Review, commit, and push the laptop foundation to the configured GitHub remote.
+- [x] Complete the Angular PWA and local Docker Compose implementation; validate browser-to-gateway-to-AI behavior.
+- [~] Commit and push the completed laptop implementation so the desktop can pull it.
+- [ ] Review and resolve remaining frontend build/test toolchain advisories (runtime production dependency audit is clean).
 
 ## Desktop — AI baseline (after laptop push)
 
