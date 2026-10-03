@@ -14,7 +14,7 @@ Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` wa
 - [x] Add local environment examples with safe non-secret defaults; keep actual secrets/model paths untracked.
 - [x] Review, commit, and push the laptop foundation to the configured GitHub remote.
 - [x] Complete the Angular PWA and local Docker Compose implementation; validate browser-to-gateway-to-AI behavior.
-- [~] Commit and push the completed laptop implementation so the desktop can pull it.
+- [x] Commit and push the completed laptop implementation so the desktop can pull it.
 - [ ] Review and resolve remaining frontend build/test toolchain advisories (runtime production dependency audit is clean).
 
 ## Desktop — AI baseline (after laptop push)

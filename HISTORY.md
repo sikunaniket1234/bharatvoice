@@ -21,3 +21,4 @@
 - Validation passed: Angular production build; Angular tests 3/3; NestJS build/tests 2/2; FastAPI tests 4/4; production dependency audit (`npm audit --omit=dev`) 0 vulnerabilities.
 - Full npm audit reports remaining high-severity Angular CLI/legacy Karma development-tool advisories (including critical Piscina advisory); tracked separately and not present in the production dependency audit.
 - Docker Compose web image was rebuilt after the final UI/privacy-copy changes; web/API/private-AI health smoke checks passed.
+- Committed and pushed the completed laptop implementation as `93e04ded58612dd880336780f35a0030c6b9b13f` (`feat: add BharatVoice Angular PWA and Docker stack`) to `origin/main`.

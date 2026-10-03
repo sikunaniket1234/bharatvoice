@@ -73,4 +73,4 @@ The repository is initialized on `main`; `origin` points to `https://github.com/
 - [x] Confirm the Angular → NestJS → FastAPI path and expected not-ready behavior.
 - [x] Review `.gitignore`, environment files and staged changes.
 - [x] Push the initial commit to origin.
-- [ ] Commit and push the Angular/Docker laptop milestone so the desktop can pull it.
+- [x] Commit and push the Angular/Docker laptop milestone so the desktop can pull it.
