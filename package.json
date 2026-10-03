@@ -1,0 +1,12 @@
+{
+  "name": "bharatvoice",
+  "private": true,
+  "workspaces": [
+    "apps/api-nestjs"
+  ],
+  "scripts": {
+    "api:dev": "npm --workspace apps/api-nestjs run start:dev",
+    "api:build": "npm --workspace apps/api-nestjs run build",
+    "api:test": "npm --workspace apps/api-nestjs run test"
+  }
+}

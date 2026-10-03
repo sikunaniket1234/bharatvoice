@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BharatVoice</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Noto+Sans+Oriya:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAFAF8;--surface:#fff;--ink:#1B1A1A;--muted:#6B6A66;--line:#E4E2DC;--red:#C8301E;--haldi:#F0B323;--indigo:#2B3A8C;--on-red:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15151A;--surface:#1E1E25;--ink:#F2F0EA;--muted:#A09E98;--line:#33323B;--red:#E2523F;--indigo:#8E9BFF;--on-red:#15151A}}
+:root[data-theme="dark"]{--bg:#15151A;--surface:#1E1E25;--ink:#F2F0EA;--muted:#A09E98;--line:#33323B;--red:#E2523F;--indigo:#8E9BFF;--on-red:#15151A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 'Figtree','Noto Sans Oriya','Noto Sans Devanagari',system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+.border{height:12px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12'%3E%3Cpolygon points='0,12 12,0 24,12' fill='%23C8301E'/%3E%3Cpolygon points='6,12 12,5 18,12' fill='%23F0B323'/%3E%3C/svg%3E") repeat-x}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px 56px}
+.hd{position:relative;display:flex;align-items:center;gap:18px;padding:18px 0;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:21px;letter-spacing:-.02em;margin-right:auto}
+.wheel{width:34px;height:34px;color:var(--red);flex:none}
+.busy .wheel{animation:spin 1.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.top{display:flex;gap:18px;font-weight:500;font-size:15px;color:var(--muted)}
+.top a:hover,.top a.cur{color:var(--ink)}
+@media (max-width:640px){.top{display:none}}
+.mb{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer;color:inherit}
+.menu{position:absolute;right:0;top:64px;z-index:5;width:min(380px,92vw);max-height:75vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 8px 12px;box-shadow:0 12px 40px rgba(0,0,0,.14)}
+.menu h4{margin:12px 10px 4px;font-size:13px;color:var(--muted);font-weight:600}
+.menu a,.menu .off{display:block;padding:9px 10px;border-radius:9px}
+.menu a:hover,.menu a.cur{background:var(--bg)}
+.menu small,.tile small{display:block;color:var(--muted);font-size:13px;line-height:1.4}
+.menu .off{opacity:.6}
+.tag{display:inline-block;font-size:11px;font-weight:600;border:1px solid var(--haldi);border-radius:999px;padding:0 7px;margin-left:6px;vertical-align:middle}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center;padding:28px 0 44px}
+@media (max-width:720px){.hero{grid-template-columns:1fr}}
+h1{font-size:clamp(34px,6vw,56px);line-height:1.05;letter-spacing:-.03em;font-weight:800;margin:0 0 16px}
+.lead{font-size:18px;color:var(--muted);max-width:46ch;margin:0 0 24px}
+.btns{display:flex;flex-wrap:wrap;gap:10px}
+.go{padding:13px 22px;border:0;border-radius:12px;background:var(--red);color:var(--on-red);font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+.go:disabled{opacity:.6;cursor:wait}
+.alt{padding:12px 22px;border:1px solid var(--line);border-radius:12px;font-weight:600;background:var(--surface)}
+.greet{position:relative;display:grid;place-items:center;min-height:300px}
+.greet .big{position:absolute;width:300px;height:300px;color:var(--haldi);opacity:.35;animation:spin 60s linear infinite}
+.greet div{position:relative;text-align:center;font-weight:700;font-size:34px;line-height:1.5}
+.greet div span{display:block}
+h2{font-size:22px;letter-spacing:-.01em;margin:6px 0 6px}
+.sub{color:var(--muted);margin:0 0 20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:44px}
+.tile{display:block;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:16px;border-left:4px solid var(--haldi)}
+a.tile:hover{border-color:var(--indigo)}
+.tile b{display:block;font-size:17px}
+.tile.off{opacity:.6;border-left-color:var(--line)}
+ol.steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;padding:0;margin:0 0 44px}
+ol.steps li{counter-increment:s;border-top:3px solid var(--red);padding-top:10px}
+ol.steps li:before{content:counter(s);font-weight:800;color:var(--red);display:block;font-size:22px}
+ol.steps b{display:block}
+ol.steps span{color:var(--muted);font-size:14px}
+.page{max-width:720px}
+.page>h2{font-size:28px;font-weight:800;margin-top:10px}
+.langs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:14px}
+select,button,textarea,input{font:inherit;color:inherit}
+select{width:100%;padding:11px 12px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-weight:600}
+.one{max-width:260px;margin-bottom:14px}
+.swap{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+textarea{width:100%;min-height:110px;border:0;outline:0;resize:vertical;background:transparent;font-size:19px;line-height:1.5}
+.row{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.sp{flex:1}
+.ghost{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:14px;font-weight:500}
+.ghost:hover{border-color:var(--indigo);color:var(--indigo)}
+.ghost.on{background:var(--red);color:var(--on-red);border-color:var(--red)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;align-items:center}
+.chips span,.lbl{color:var(--muted);font-size:14px}
+.status{min-height:22px;color:var(--muted);font-size:14px;margin:8px 0}
+.out{min-height:70px;font-size:21px;line-height:1.5;border-left:4px solid var(--haldi);padding-left:14px}
+.out.empty{color:var(--muted);font-size:16px}
+.bigmic{display:block;margin:6px auto 14px;width:92px;height:92px;border-radius:50%;border:0;background:var(--red);color:var(--on-red);font-weight:700;cursor:pointer;font-size:15px}
+.bigmic.on{outline:6px solid var(--haldi)}
+.hist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hist li{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+.hist .use{flex:1;text-align:left;background:none;border:0;cursor:pointer;padding:0}
+.hist small{display:block;color:var(--muted)}
+.hist .del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:18px}
+.chat{display:grid;gap:8px;margin-bottom:14px}
+.b{max-width:80%;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+.b small{display:block;color:var(--muted)}
+.b.r{justify-self:end;border-color:var(--haldi)}
+.say{display:flex;gap:8px;margin-bottom:8px}
+.say input{flex:1;padding:11px 12px;border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:0}
+.note{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:9}
+.toast.show{opacity:1}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.busy .wheel,.greet .big{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="wh" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3"><circle cx="50" cy="50" r="46" stroke-width="5"/><circle cx="50" cy="50" r="30" stroke-dasharray="3 5"/><circle cx="50" cy="50" r="9" fill="currentColor"/><line x1="50" y1="6" x2="50" y2="94"/><line x1="6" y1="50" x2="94" y2="50"/><line x1="19" y1="19" x2="81" y2="81"/><line x1="81" y1="19" x2="19" y2="81"/></symbol></svg>
+<div class="border" aria-hidden="true"></div>
+<div class="wrap">
+<header class="hd">
+  <a class="brand" href="#/"><svg class="wheel"><use href="#wh"/></svg>BharatVoice</a>
+  <nav class="top nav"><a href="#/translate">Translate</a><a href="#/stt">Speech to text</a><a href="#/tts">Text to speech</a></nav>
+  <button class="mb" id="mb" aria-expanded="false" aria-controls="menu">Menu</button>
+  <nav class="menu nav" id="menu" hidden></nav>
+</header>
+
+<section data-view="home">
+  <div class="hero">
+    <div>
+      <h1>Say it in Odia, Hindi or English.</h1>
+      <p class="lead">Translate text, turn speech into words, and hear any sentence read aloud. Built Odia first.</p>
+      <div class="btns"><a class="go" href="#/translate">Start translating</a><a class="alt" href="#tools">Browse tools</a></div>
+    </div>
+    <div class="greet"><svg class="big"><use href="#wh"/></svg><div><span lang="or">ନମସ୍କାର</span><span lang="hi">नमस्ते</span><span>Hello</span></div></div>
+  </div>
+  <h2 id="tools">Everything in one place</h2>
+  <p class="sub">Pick a tool from here or from the menu at the top.</p>
+  <div class="tiles" id="tiles"></div>
+  <h2>How speech translation works</h2>
+  <p class="sub">Four steps, usually a few seconds end to end.</p>
+  <ol class="steps"><li><b>Listen</b><span>Your speech is turned into text.</span></li><li><b>Clean up</b><span>Mixed or noisy phrases are tidied.</span></li><li><b>Translate</b><span>The sentence moves to your target language.</span></li><li><b>Speak</b><span>The translation is read aloud.</span></li></ol>
+</section>
+
+<section data-view="translate" class="page" hidden>
+  <h2>Text translation</h2><p class="sub">English to Odia or Hindi, and back.</p>
+  <div class="langs"><select id="tf" aria-label="Translate from"></select><button class="swap" id="tw" aria-label="Swap languages">⇄</button><select id="tt2" aria-label="Translate to"></select></div>
+  <div class="card"><textarea id="src" placeholder="Type or paste text" aria-label="Text to translate"></textarea><div class="row"><span class="sp"></span><button class="ghost" id="clr">Clear</button></div></div>
+  <div class="chips" id="chips"><span>Try a phrase:</span></div>
+  <button class="go" id="go" style="width:100%">Translate</button>
+  <div class="status" id="status" role="status"></div>
+  <div class="card"><div class="out empty" id="out">The translation will appear here.</div><div class="row"><button class="ghost" id="lis">Listen</button><button class="ghost" id="cpy">Copy</button></div></div>
+</section>
+
+<section data-view="stt" class="page" hidden>
+  <h2>Speech to text</h2><p class="sub">Tap the mic, speak, and get the words written down.</p>
+  <select class="one" id="sl" aria-label="Spoken language"></select>
+  <button class="bigmic" id="sm">Speak</button>
+  <div class="card"><textarea id="stx" placeholder="Your words will appear here" aria-label="Transcript"></textarea><div class="row"><button class="ghost" id="scp">Copy</button><button class="ghost" id="sto">Translate this</button></div></div>
+</section>
+
+<section data-view="tts" class="page" hidden>
+  <h2>Text to speech</h2><p class="sub">Type text and hear it read aloud.</p>
+  <select class="one" id="tl" aria-label="Language to speak"></select>
+  <div class="card"><textarea id="ttx" placeholder="Type what you want to hear" aria-label="Text to speak"></textarea>
+  <div class="row"><label class="lbl" for="rate">Speed</label><input type="range" id="rate" min="0.6" max="1.4" step="0.1" value="1"><span class="sp"></span><button class="ghost" id="smp">Sample</button><button class="ghost" id="stp">Stop</button><button class="go" id="ply" style="padding:8px 20px">Play</button></div></div>
+</section>
+
+<section data-view="speech-translate" class="page" hidden>
+  <h2>Speech translation</h2><p class="sub">Speak in one language and hear it in another.</p>
+  <div class="langs"><select id="pf" aria-label="Speak in"></select><button class="swap" id="pw" aria-label="Swap languages">⇄</button><select id="pt" aria-label="Translate to"></select></div>
+  <button class="bigmic" id="pm">Speak</button>
+  <div class="status" id="ps" role="status"></div>
+  <div class="card"><div class="lbl">Heard</div><div class="out empty" id="ph">Nothing yet.</div></div>
+  <div class="card"><div class="lbl">Translation</div><div class="out empty" id="po">Nothing yet.</div><div class="row"><button class="ghost" id="pl">Listen</button></div></div>
+</section>
+
+<section data-view="conversation" class="page" hidden>
+  <h2>Conversation</h2><p class="sub">Two people, two languages, taking turns.</p>
+  <select class="one" id="cl" aria-label="Second speaker language"></select>
+  <div class="chat" id="cm"><p class="lbl" id="ce">No messages yet. Type a sample phrase for either speaker.</p></div>
+  <div class="say"><input id="ca" placeholder="Speaker A, English" aria-label="Speaker A message"><button class="ghost" id="cas">Send</button></div>
+  <div class="say"><input id="cb" placeholder="Speaker B" aria-label="Speaker B message"><button class="ghost" id="cbs">Send</button></div>
+</section>
+
+<section data-view="transliterate" class="page" hidden>
+  <h2>Transliteration <span class="tag">Beta</span></h2><p class="sub">Type with English letters and get Odia or Hindi script. Try namaste, dhanyabad, pani, ghar, bharat.</p>
+  <select class="one" id="xl" aria-label="Target script"></select>
+  <div class="card"><textarea id="xi" placeholder="Type here, for example: namaste bharat" aria-label="Roman text"></textarea></div>
+  <div class="card"><div class="out empty" id="xo">The result appears as you type.</div></div>
+</section>
+
+<section data-view="history" class="page" hidden>
+  <h2>History</h2><p class="sub">Open, copy or delete past translations.</p>
+  <ul class="hist" id="hist"></ul><p class="lbl" id="eh">Your translations will appear here.</p>
+</section>
+
+<p class="note">Prototype with six sample phrases and a small transliteration list. Odia and Hindi are translated through English in this first release, so they are not offered as a direct pair. Real translation, speech recognition and voices will come from the AI4Bharat models.</p>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const L={en:{n:'English',b:'en-IN'},or:{n:'ଓଡ଼ିଆ',b:'or-IN'},hi:{n:'हिन्दी',b:'hi-IN'}};
+const S=[
+{en:'Where is the railway station?',or:'ରେଳ ଷ୍ଟେସନ କେଉଁଠାରେ?',hi:'रेलवे स्टेशन कहाँ है?'},
+{en:'How much does this cost?',or:'ଏହାର ଦାମ କେତେ?',hi:'इसकी कीमत कितनी है?'},
+{en:'I am going to the office today.',or:'ମୁଁ ଆଜି ଅଫିସ୍ ଯାଉଛି।',hi:'मैं आज ऑफिस जा रहा हूँ।'},
+{en:'Thank you very much.',or:'ଆପଣଙ୍କୁ ବହୁତ ଧନ୍ୟବାଦ।',hi:'आपका बहुत धन्यवाद।'},
+{en:'Please speak slowly.',or:'ଦୟାକରି ଧୀରେ କୁହନ୍ତୁ।',hi:'कृपया धीरे बोलिए।'},
+{en:'Good morning.',or:'ସୁପ୍ରଭାତ।',hi:'सुप्रभात।'}];
+const D={namaste:{or:'ନମସ୍କାର',hi:'नमस्ते'},dhanyabad:{or:'ଧନ୍ୟବାଦ',hi:'धन्यवाद'},pani:{or:'ପାଣି',hi:'पानी'},ghar:{or:'ଘର',hi:'घर'},bharat:{or:'ଭାରତ',hi:'भारत'},odisha:{or:'ଓଡ଼ିଶା',hi:'ओडिशा'},bhai:{or:'ଭାଇ',hi:'भाई'}};
+const T=[
+{id:'translate',g:'Translate',t:'Text translation',d:'Type a sentence and translate it between English, Odia and Hindi.'},
+{id:'speech-translate',g:'Translate',t:'Speech translation',d:'Speak in one language and hear it in another.'},
+{id:'conversation',g:'Translate',t:'Conversation',d:'Two people, two languages, taking turns.'},
+{id:'stt',g:'Speech',t:'Speech to text',d:'Speak and get the words written down.'},
+{id:'tts',g:'Speech',t:'Text to speech',d:'Type text and hear it read aloud.'},
+{id:'transliterate',g:'More',t:'Transliteration',d:'Write Odia or Hindi words using English letters.',tag:'Beta'},
+{id:'history',g:'More',t:'History',d:'Replay, copy or delete past translations.'},
+{id:null,g:'More',t:'Developer API',d:'Use BharatVoice inside your own apps.',tag:'Later'}];
+const $=id=>document.getElementById(id);
+const norm=s=>s.toLowerCase().replace(/[\s.?!।]+$/g,'').replace(/\s+/g,' ').trim();
+const tr=(t,f,o)=>{const p=S.find(x=>norm(x[f])===norm(t));return p?p[o]:null};
+let tt,hist=[],last=null;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800)}
+function fillL(el,v,only){el.innerHTML=(only||Object.keys(L)).map(k=>`<option value="${k}">${L[k].n}</option>`).join('');el.value=v}
+function item(x,cls){const i=`<b>${x.t}${x.tag?`<span class="tag">${x.tag}</span>`:''}</b><small>${x.d}</small>`;return x.id?`<a class="${cls}" href="#/${x.id}">${i}</a>`:`<div class="${cls} off">${i}</div>`}
+$('tiles').innerHTML=T.map(x=>item(x,'tile')).join('');
+$('menu').innerHTML=['Translate','Speech','More'].map(g=>`<h4>${g}</h4>`+T.filter(x=>x.g===g).map(x=>item(x,'')).join('')).join('');
+$('mb').onclick=()=>{const m=$('menu');m.hidden=!m.hidden;$('mb').setAttribute('aria-expanded',String(!m.hidden))};
+document.addEventListener('click',e=>{if(!e.target.closest('.hd')){$('menu').hidden=true;$('mb').setAttribute('aria-expanded','false')}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('menu').hidden=true;$('mb').setAttribute('aria-expanded','false')}});
+function speak(text,lang){
+  if(!('speechSynthesis' in window)){toast('Speech playback is not supported in this browser.');return}
+  const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-').toLowerCase().startsWith(lang));
+  if(!v){toast('No '+L[lang].n+' voice on this device. The real app will use Indic-TTS.');return}
+  const u=new SpeechSynthesisUtterance(text);u.voice=v;u.lang=v.lang;u.rate=+$('rate').value||1;speechSynthesis.cancel();speechSynthesis.speak(u);
+}
+function mic(btn,lang,cb){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input is not supported in this browser.');return}
+  if(btn._r){btn._r.stop();return}
+  const lbl=btn.textContent;
+  try{const r=new SR();r.lang=L[lang()].b;r.onresult=e=>cb(e.results[0][0].transcript);
+    r.onerror=e=>toast('Could not hear you ('+e.error+'). Check the microphone permission.');
+    r.onend=()=>{btn._r=null;btn.classList.remove('on');btn.textContent=lbl};
+    btn._r=r;r.start();btn.classList.add('on');btn.textContent='Listening…';
+  }catch(e){btn._r=null;toast('Voice input could not start.')}
+}
+function pair(fe,te,sw,init){
+  const s={from:init[0],to:init[1]};fillL(fe,s.from);fillL(te,s.to);
+  s.sync=c=>{if(s.from!=='en'&&s.to!=='en'){if(c==='from')s.to='en';else s.from='en'}
+    if(s.from===s.to){if(c==='from')s.to=s.from==='en'?'or':'en';else s.from=s.to==='en'?'or':'en'}
+    fe.value=s.from;te.value=s.to};
+  fe.onchange=()=>{s.from=fe.value;s.sync('from')};te.onchange=()=>{s.to=te.value;s.sync('to')};
+  sw.onclick=()=>{[s.from,s.to]=[s.to,s.from];s.sync('from')};return s;
+}
+const tp=pair($('tf'),$('tt2'),$('tw'),['or','en']),sp=pair($('pf'),$('pt'),$('pw'),['or','en']);
+function setOut(el,text,lang){el.textContent=text;el.lang=lang||'';el.classList.remove('empty')}
+function addHist(r){hist.unshift(r);hist=hist.slice(0,20)}
+function run(text,p,done){
+  const st=p===tp?$('status'):$('ps');document.body.classList.add('busy');st.textContent='Cleaning up the text…';
+  setTimeout(()=>{st.textContent='Translating…'},450);
+  setTimeout(()=>{document.body.classList.remove('busy');st.textContent='';done(tr(text,p.from,p.to))},1000);
+}
+S.forEach(p=>{const b=document.createElement('button');b.className='ghost';b.textContent=p.en;b.onclick=()=>{$('src').value=p[tp.from];$('src').focus()};$('chips').appendChild(b)});
+$('clr').onclick=()=>{$('src').value=''};
+$('go').onclick=()=>{
+  const text=$('src').value.trim();if(!text){toast('Type something first.');return}
+  $('go').disabled=true;
+  run(text,tp,out=>{$('go').disabled=false;
+    if(out){last={from:tp.from,to:tp.to,src:text,out};setOut($('out'),out,tp.to);addHist(last);$('status').textContent='Done'}
+    else{last=null;setOut($('out'),'This prototype only knows the sample phrases above. Tap one to try it.');$('out').classList.add('empty')}});
+};
+$('lis').onclick=()=>last?speak(last.out,last.to):toast('Translate something first.');
+$('cpy').onclick=async()=>{if(!last){toast('Nothing to copy yet.');return}try{await navigator.clipboard.writeText(last.out);toast('Copied')}catch(e){toast('Copy is blocked here. Select the text and copy it.')}};
+fillL($('sl'),'or');
+$('sm').onclick=()=>mic($('sm'),()=>$('sl').value,t=>{$('stx').value=t});
+$('scp').onclick=async()=>{const v=$('stx').value;if(!v){toast('No transcript yet.');return}try{await navigator.clipboard.writeText(v);toast('Copied')}catch(e){toast('Copy is blocked here. Select the text and copy it.')}};
+$('sto').onclick=()=>{const v=$('stx').value.trim();if(!v){toast('No transcript yet.');return}tp.from=$('sl').value;tp.sync('from');$('src').value=v;location.hash='#/translate'};
+fillL($('tl'),'hi');
+$('ply').onclick=()=>{const v=$('ttx').value.trim();v?speak(v,$('tl').value):toast('Type some text first.')};
+$('stp').onclick=()=>{if('speechSynthesis' in window)speechSynthesis.cancel()};
+$('smp').onclick=()=>{$('ttx').value=S[Math.floor(Math.random()*S.length)][$('tl').value]};
+$('pm').onclick=()=>mic($('pm'),()=>sp.from,t=>{setOut($('ph'),t,sp.from);$('pm').disabled=true;
+  run(t,sp,out=>{$('pm').disabled=false;
+    if(out){last={from:sp.from,to:sp.to,src:t,out};setOut($('po'),out,sp.to);addHist(last)}
+    else{last=null;setOut($('po'),'Prototype only knows the sample phrases. Try one of them.');$('po').classList.add('empty')}})});
+$('pl').onclick=()=>last?speak(last.out,last.to):toast('Speak something first.');
+fillL($('cl'),'or',['or','hi']);
+$('cb').placeholder='Speaker B, '+L.or.n;$('cl').onchange=()=>{$('cb').placeholder='Speaker B, '+L[$('cl').value].n};
+function say(inp,from,to,right){
+  const t=inp.value.trim();if(!t)return;const o=tr(t,from,to)||'(prototype knows sample phrases only)';
+  $('ce').hidden=true;const d=document.createElement('div');d.className='b'+(right?' r':'');
+  d.innerHTML='<span></span><small></small>';d.firstChild.textContent=t;d.lastChild.textContent=o;d.lastChild.lang=to;
+  $('cm').appendChild(d);inp.value='';
+}
+$('cas').onclick=()=>say($('ca'),'en',$('cl').value,false);
+$('cbs').onclick=()=>say($('cb'),$('cl').value,'en',true);
+$('ca').onkeydown=e=>{if(e.key==='Enter')$('cas').click()};$('cb').onkeydown=e=>{if(e.key==='Enter')$('cbs').click()};
+fillL($('xl'),'or',['or','hi']);
+function xl(){const v=$('xi').value.trim(),o=$('xo');if(!v){o.textContent='The result appears as you type.';o.classList.add('empty');return}
+  setOut(o,v.split(/\s+/).map(w=>(D[w.toLowerCase()]||{})[$('xl').value]||w).join(' '),$('xl').value)}
+$('xi').oninput=xl;$('xl').onchange=xl;
+function renderHist(){
+  const ul=$('hist');ul.innerHTML='';$('eh').hidden=hist.length>0;
+  hist.forEach((h,i)=>{const li=document.createElement('li'),u=document.createElement('button');u.className='use';
+    u.innerHTML='<span></span><small></small>';u.firstChild.textContent=h.out;u.firstChild.lang=h.to;
+    u.lastChild.textContent=L[h.from].n+' to '+L[h.to].n+': '+h.src;
+    u.onclick=()=>{tp.from=h.from;tp.to=h.to;tp.sync('from');$('src').value=h.src;last=h;setOut($('out'),h.out,h.to);location.hash='#/translate'};
+    const d=document.createElement('button');d.className='del';d.textContent='×';d.setAttribute('aria-label','Delete translation');
+    d.onclick=()=>{hist.splice(i,1);renderHist()};li.append(u,d);ul.appendChild(li)});
+}
+function route(){
+  const h=location.hash.replace(/^#\/?/,'');const id=document.querySelector(`[data-view="${h}"]`)?h:'home';
+  document.querySelectorAll('[data-view]').forEach(e=>e.hidden=e.dataset.view!==id);
+  $('menu').hidden=true;$('mb').setAttribute('aria-expanded','false');
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('cur',a.getAttribute('href')==='#/'+id));
+  if(id==='history')renderHist();
+  if(h!=='tools')window.scrollTo(0,0);
+}
+addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>

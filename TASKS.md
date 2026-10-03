@@ -1,0 +1,37 @@
+# BharatVoice task tracker
+
+Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` waiting on an external decision or machine.
+
+## Laptop — foundation
+
+- [x] Establish repository layout and reproducible local development instructions.
+- [x] Implement Phase 1 translation request/response contracts and reject unsupported language pairs.
+- [x] Add FastAPI health/readiness endpoints and a replaceable `TranslationProvider` boundary.
+- [x] Add NestJS gateway validation and forwarding to FastAPI.
+- [x] Add API contract/unit tests; a missing model returns an explicit not-ready error, never fake a translation.
+- [ ] Migrate the HTML prototype into the Angular PWA and connect its translation flow to NestJS.
+- [x] Add local environment examples with safe non-secret defaults; keep actual secrets/model paths untracked.
+- [~] Push the reviewed initial commit to the configured GitHub remote so the desktop can pull it.
+
+## Desktop — AI baseline (after laptop push)
+
+- [ ] Pull the agreed branch and confirm the repository instructions match the desktop OS.
+- [ ] Record OS, driver, CUDA/container support, free disk, RAM and available VRAM before installing AI dependencies.
+- [ ] Prepare a private development environment; install NVIDIA driver/Container Toolkit only if the host OS/runtime requires them.
+- [ ] Implement and benchmark IndicTrans2 distilled 200M English → Indic for Odia first.
+- [ ] Add Indic → English, then verify English ↔ Hindi through the same provider architecture.
+- [ ] Add controlled evaluation examples and record latency, memory use, model version and license.
+- [ ] Keep model files out of Git and load/unload models rather than keeping every model resident on the 4 GB GPU.
+
+## Later Phase 1
+
+- [ ] Add PostgreSQL and Redis for application persistence, rate limits and job/session support.
+- [ ] Add Gemma only after the direct IndicTrans2 baseline; schema-validate allow-listed normalization/routing output.
+- [ ] Add IndicConformer ASR and Indic-TTS behind independent provider interfaces.
+- [ ] Complete speech translation, transliteration beta and turn-based conversation.
+- [ ] Add authentication, upload validation, retention/cleanup policy, backups, monitoring and security review before any pilot.
+- [ ] Create private pilot deployment with Cloudflare Tunnel only after an explicit domain/account decision; never expose DB/Redis or forward router ports.
+
+## Phase 2 (not current scope)
+
+- [ ] Direct Odia ↔ Hindi translation, streaming conversation, long-form audio, document/image translation, more languages, offline inference and developer API/SDK.

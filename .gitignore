@@ -1,0 +1,40 @@
+# Environment secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+coverage/
+.nx/
+.angular/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# AI model weights, caches and audio fixtures with user data
+models/
+model-cache/
+.huggingface/
+.cache/huggingface/
+*.safetensors
+*.gguf
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.wav
+*.mp3
+*.flac
+
+# Local databases and runtime logs
+*.sqlite3
+*.db
+*.log
