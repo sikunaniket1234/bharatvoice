@@ -16,7 +16,9 @@ from app.schemas import LanguageCode
 
 FLORES_CODES: dict[LanguageCode, str] = {
     "en": "eng_Latn",
-    "or": "ory_Deva",
+    # Odia is ory_Orya, not ory_Deva. The script suffix must match the tag in
+    # each checkpoint's own LANGUAGE_TAGS set or the tokenizer asserts out.
+    "or": "ory_Orya",
     "hi": "hin_Deva",
 }
 

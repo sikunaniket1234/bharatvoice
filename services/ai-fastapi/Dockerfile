@@ -3,6 +3,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /workspace
 
+# build-essential is needed only by the ML layer, but it has to be installed in
+# the same image. torch's Triton runtime compiles fused kernels at first use and
+# raises "Failed to find C compiler. Please specify via CC environment variable"
+# during generation on a slim image with no toolchain, which surfaced as a 502
+# from the gateway rather than an obvious dependency error. gcc also lets
+# IndicTransToolkit build from source if a wheel is ever unavailable.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # The machine-learning extras are opt-in. The contract, health and readiness
 # endpoints all work without them, and the service reports itself not-ready, so
 # a default build stays small and quick. Pass --build-arg INSTALL_ML=true to

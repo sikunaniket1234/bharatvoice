@@ -132,7 +132,20 @@ def test_inference_failure_surfaces_as_502(provider) -> None:
 
 
 def test_flores_codes_cover_the_phase_1_languages() -> None:
-    assert FLORES_CODES == {"en": "eng_Latn", "or": "ory_Deva", "hi": "hin_Deva"}
+    assert FLORES_CODES == {"en": "eng_Latn", "or": "ory_Orya", "hi": "hin_Deva"}
+
+
+def test_flores_codes_match_the_checkpoint_language_tags() -> None:
+    """Each checkpoint asserts its target tag against its own LANGUAGE_TAGS.
+
+    Odia is ory_Orya, not ory_Deva. Getting this wrong produces an
+    AssertionError deep inside the tokenizer's _src_tokenize, which surfaced as
+    a 502 rather than a clear configuration error, so the exact strings are
+    pinned here.
+    """
+    assert FLORES_CODES["or"] == "ory_Orya"
+    assert FLORES_CODES["hi"] == "hin_Deva"
+    assert FLORES_CODES["en"] == "eng_Latn"
 
 
 def test_direction_selects_the_matching_checkpoint() -> None:

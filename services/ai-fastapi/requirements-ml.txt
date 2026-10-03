@@ -15,15 +15,24 @@
 # The CUDA build is selected by the installer, not here:
 #   pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r requirements-ml.txt
 #
-# transformers is held below 5.0.0: the IndicTrans2 model cards state that the
-# "translation" pipeline was removed in transformers v5, and these checkpoints
-# are trust_remote_code models best matched to the 4.x line.
+# transformers is pinned to 4.46.x. It is not merely bounded below 5.0.0: the
+# IndicTrans2 model cards state that the "translation" pipeline was removed in
+# transformers v5, and these checkpoints are trust_remote_code models whose
+# bundled modeling code is tightly coupled to one generation of the 4.x API.
+# Specifically, modeling_indictrans.py does
+#   past_key_values[0][0].shape[2] if past_key_values is not None else 0
+# which raises AttributeError under the Cache object introduced later in 4.x,
+# because a fresh DynamicCache returns None for index 0. Verified on this
+# hardware: 4.57.6 fails with
+#   AttributeError: 'NoneType' object has no attribute 'shape'
+# and 4.46.3 generates correctly. Do not widen this range without re-running the
+# en->or and or->en benchmark.
 #
 # flash_attention_2 is intentionally NOT enabled. The model cards say not to
 # set it when flash-attn is unavailable, and it has no supported Windows build.
 
 torch>=2.6,<3.0
-transformers>=4.44,<5.0
+transformers>=4.46,<4.47
 sentencepiece>=0.2.0
 sacremoses>=0.1.1
 accelerate>=0.34

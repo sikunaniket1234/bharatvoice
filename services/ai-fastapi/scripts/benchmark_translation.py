@@ -69,6 +69,23 @@ def percentile(values: list[float], fraction: float) -> float:
     return round(ordered[index], 3)
 
 
+def _metric_signature(metric_name: str) -> str:
+    """Return a sacrebleu signature string across sacrebleu versions.
+
+    sacrebleu 2.6.0 removed ``get_signature`` from the score objects returned by
+    ``corpus_bleu``/``corpus_chrf``; it now lives on the metric class itself.
+    A metric signature is what makes a BLEU number reproducible, so it is worth
+    reporting, but it must not be allowed to crash the benchmark.
+    """
+    try:
+        import sacrebleu
+
+        metric = getattr(sacrebleu.metrics, metric_name.upper())()
+        return str(metric.get_signature())
+    except Exception:  # pragma: no cover - defensive, version dependent
+        return ""
+
+
 def score(hypotheses: list[str], references: list[str]) -> dict[str, float]:
     try:
         import sacrebleu
@@ -79,7 +96,8 @@ def score(hypotheses: list[str], references: list[str]) -> dict[str, float]:
     return {
         "bleu": round(bleu.score, 2),
         "chrf": round(chrf.score, 2),
-        "bleu_signature": str(bleu.get_signature()),
+        "bleu_signature": _metric_signature("bleu"),
+        "chrf_signature": _metric_signature("chrf"),
     }
 
 

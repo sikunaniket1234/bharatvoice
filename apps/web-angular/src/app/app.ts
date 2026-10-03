@@ -58,6 +58,15 @@ const SAMPLE_PHRASES: Record<LanguageCode, string[]> = {
   hi: ['रेलवे स्टेशन कहाँ है?', 'आपका बहुत धन्यवाद।', 'कृपया धीरे बोलिए।'],
 };
 
+/**
+ * Languages the microphone is allowed to listen in.
+ *
+ * Voice input is deliberately limited to English and Odia. Hindi stays
+ * selectable for typing and text-to-speech, but the browser speech
+ * recognition used here is not offered for it.
+ */
+const SPEECH_INPUT_LANGUAGES: LanguageCode[] = ['en', 'or'];
+
 const WORD_MAP: Record<string, Record<'or' | 'hi', string>> = {
   namaste: { or: 'ନମସ୍କାର', hi: 'नमस्ते' },
   dhanyabad: { or: 'ଧନ୍ୟବାଦ', hi: 'धन्यवाद' },
@@ -100,6 +109,7 @@ export class App {
   protected toastMessage = '';
   protected history: TranslationRecord[] = this.loadHistory();
   protected speechLanguage: LanguageCode = 'or';
+protected speechTargetLanguage: LanguageCode = 'en';
   protected speechText = '';
   protected speechListening = false;
   protected voiceLanguage: LanguageCode = 'or';
@@ -115,6 +125,31 @@ export class App {
 
   private recognition: SpeechRecognitionLike | null = null;
   private toastTimer?: ReturnType<typeof setTimeout>;
+  protected listeningTarget: string | null = null;
+
+  /**
+   * Keep a chosen pair usable. IndicTrans2 has no direct Odia-Hindi route, so
+   * a pair where neither side is English collapses onto English. Same-language
+   * pairs are allowed for English and Odia only, because those are the
+   * dictation cases (speak Odia, read Odia) which transcription alone handles.
+   */
+  private static constrainPair(a: LanguageCode, b: LanguageCode): [LanguageCode, LanguageCode] {
+    if (a === b) {
+      return a === 'hi' ? ['hi', 'en'] : [a, b];
+    }
+    if (a !== 'en' && b !== 'en') {
+      return [a, 'en'];
+    }
+    return [a, b];
+  }
+
+  protected speechInputSupported(code: LanguageCode): boolean {
+    return SPEECH_INPUT_LANGUAGES.includes(code);
+  }
+
+  protected isListening(target: string): boolean {
+    return this.listeningTarget === target;
+  }
 
   protected get sourceLanguageName(): string {
     return this.language(this.sourceLanguage).name;
@@ -142,33 +177,19 @@ export class App {
   }
 
   protected changeSourceLanguage(source: LanguageCode): void {
-    this.sourceLanguage = source;
-    if (source === this.targetLanguage) {
-      this.targetLanguage = source === 'en' ? 'or' : 'en';
-    } else if (source !== 'en' && this.targetLanguage !== 'en') {
-      this.targetLanguage = 'en';
-    }
+    [this.sourceLanguage, this.targetLanguage] = App.constrainPair(source, this.targetLanguage);
     this.translatedText = '';
     this.translationStatus = '';
   }
 
   protected changeTargetLanguage(target: LanguageCode): void {
-    this.targetLanguage = target;
-    if (target === this.sourceLanguage) {
-      this.sourceLanguage = target === 'en' ? 'or' : 'en';
-    } else if (target !== 'en' && this.sourceLanguage !== 'en') {
-      this.sourceLanguage = 'en';
-    }
+    [this.sourceLanguage, this.targetLanguage] = App.constrainPair(this.sourceLanguage, target);
     this.translatedText = '';
     this.translationStatus = '';
   }
 
   protected swapLanguages(): void {
-    [this.sourceLanguage, this.targetLanguage] = [this.targetLanguage, this.sourceLanguage];
-    if (this.sourceLanguage !== 'en' && this.targetLanguage !== 'en') {
-      this.sourceLanguage = 'en';
-      this.targetLanguage = 'or';
-    }
+    [this.sourceLanguage, this.targetLanguage] = App.constrainPair(this.targetLanguage, this.sourceLanguage);
     [this.sourceText, this.translatedText] = [this.translatedText, this.sourceText];
     this.translationStatus = '';
   }
@@ -179,22 +200,42 @@ export class App {
       this.translationStatus = 'Add a phrase first, then we can translate it.';
       return;
     }
-    this.requestTranslation(text, this.sourceLanguage, this.targetLanguage, (result) => {
-      this.translatedText = result.translated_text;
-      this.translationStatus = 'Translation complete.';
-      this.history = [
-        {
-          id: crypto.randomUUID(),
-          text,
-          translatedText: result.translated_text,
-          sourceLanguage: this.sourceLanguage,
-          targetLanguage: this.targetLanguage,
-          createdAt: Date.now(),
-        },
-        ...this.history,
-      ].slice(0, 30);
-      this.saveHistory();
+    const source = this.sourceLanguage;
+    const target = this.targetLanguage;
+    if (source === target) {
+      // Dictation case: English to English, Odia to Odia. en:en and or:or are
+      // not valid IndicTrans2 pairs, and sending already-correct text through
+      // the model could only rewrite it, so transcription stands alone.
+      this.completeTranslation(text, text, source, target,
+        'Heard in ' + this.language(source).name + '. No translation was needed.');
+      return;
+    }
+    this.requestTranslation(text, source, target, (result) => {
+      this.completeTranslation(text, result.translated_text, source, target, 'Translation complete.');
     });
+  }
+
+  private completeTranslation(
+    text: string,
+    translated: string,
+    source: LanguageCode,
+    target: LanguageCode,
+    status: string,
+  ): void {
+    this.translatedText = translated;
+    this.translationStatus = status;
+    this.history = [
+      {
+        id: crypto.randomUUID(),
+        text,
+        translatedText: translated,
+        sourceLanguage: source,
+        targetLanguage: target,
+        createdAt: Date.now(),
+      },
+      ...this.history,
+    ].slice(0, 30);
+    this.saveHistory();
   }
 
   protected useHistory(record: TranslationRecord): void {
@@ -257,6 +298,10 @@ export class App {
       return;
     }
     const code = target === 'speech' ? this.speechLanguage : target === 'translate' ? this.sourceLanguage : target === 'conversation-a' ? 'en' : this.conversationLanguage;
+    if (!this.speechInputSupported(code)) {
+      this.showToast('Voice input works in English and Odia only. ' + this.language(code).name + ' is not available for the microphone yet.');
+      return;
+    }
     const recognition = new SpeechRecognitionCtor();
     recognition.lang = this.language(code).locale;
     recognition.interimResults = false;
@@ -270,14 +315,17 @@ export class App {
     recognition.onerror = () => this.showToast('Could not hear you. Check microphone permission and try again.');
     recognition.onend = () => {
       this.recognition = null;
+      this.listeningTarget = null;
       this.speechListening = false;
     };
     this.recognition = recognition;
-    this.speechListening = target === 'speech';
+    this.listeningTarget = target;
+    this.speechListening = true;
     try {
       recognition.start();
     } catch {
       this.recognition = null;
+      this.listeningTarget = null;
       this.speechListening = false;
       this.showToast('Voice input could not start.');
     }
@@ -289,8 +337,10 @@ export class App {
       this.showToast('Record or type a phrase first.');
       return;
     }
-    this.sourceLanguage = this.speechLanguage;
-    this.targetLanguage = this.speechLanguage === 'en' ? 'or' : 'en';
+    const [source, target] = App.constrainPair(this.speechLanguage, this.speechTargetLanguage);
+    this.speechTargetLanguage = target;
+    this.sourceLanguage = source;
+    this.targetLanguage = target;
     this.sourceText = text;
     this.activeTool = 'translate';
     this.translate();
@@ -312,6 +362,12 @@ export class App {
       pending: true,
     };
     this.conversationMessages = [...this.conversationMessages, message];
+    if (sourceLanguage === targetLanguage) {
+      // Both speakers picked the same language, so this turn is transcription
+      // only. en:en is not a valid IndicTrans2 pair and must not be sent.
+      this.updateConversation(message.id, { translatedText: text, pending: false });
+      return;
+    }
     this.requestTranslation(text, sourceLanguage, targetLanguage, (result) => {
       this.updateConversation(message.id, {
         translatedText: result.translated_text,

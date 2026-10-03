@@ -208,6 +208,9 @@ textarea::placeholder, input::placeholder { color: color-mix(in srgb, var(--mute
 .footer-brand .brand-mark { width: 29px; height: 29px; }
 .footer > span:last-child { font-size: 8px; letter-spacing: .14em; }
 .footer-odia { margin-left: 7px; color: var(--accent); }
+.footer-legal { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-left: auto; text-align: right; line-height: 1.4; }
+.footer-legal .footer-rights { font-size: 8px; letter-spacing: .14em; text-transform: uppercase; }
+.footer-legal .footer-credit { font-size: 10px; letter-spacing: .02em; }
 .toast { position: fixed; z-index: 10; left: 50%; bottom: 24px; max-width: calc(100vw - 32px); padding: 12px 18px; border-radius: 6px; background: var(--ink); color: var(--paper); font-size: 12px; opacity: 0; pointer-events: none; transform: translate(-50%, 8px); transition: opacity .18s ease, transform .18s ease; }
 .toast.toast-visible { opacity: 1; transform: translate(-50%, 0); }
 button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

@@ -1,5 +1,39 @@
 # Project history
 
+## 2026-10-03 — Real IndicTrans2 inference on the GTX 1650 Super
+
+Authenticated the gated Hugging Face checkpoints and got genuine GPU translation working end to end for the first time. Both checkpoints report `gated: "auto"` and now resolve for the configured token; the AI service reports `ready: true` and the browser-facing Translate tab is live.
+
+Running the model for real surfaced four defects that unit tests and import checks could not have caught. All four are fixed and the reasons are recorded in the code so they do not regress:
+
+- **Wrong FLORES code for Odia.** `config.py` mapped `or` to `ory_Deva`. Neither checkpoint accepts that tag; their own `LANGUAGE_TAGS` requires `ory_Orya`. The failure surfaced as an HTTP 502 with an `AssertionError` buried inside the tokenizer's `_src_tokenize`, not as a configuration error. Corrected and pinned in the test suite.
+- **`transformers` was too new for the checkpoint's bundled code.** The models are `trust_remote_code`, and `modeling_indictrans.py` computes `past_key_values[0][0].shape[2] if past_key_values is not None else 0`. That breaks on the `Cache` object introduced later in the 4.x line, where a fresh cache returns `None` for index 0: `AttributeError: 'NoneType' object has no attribute 'shape'`. Verified empirically that 4.57.6 fails and 4.46.3 generates, then pinned `transformers>=4.46,<4.47` with the evidence recorded in `requirements-ml.txt`.
+- **The image had no C compiler.** `python:3.12-slim` plus torch means Triton's first-use kernel build fails with `Failed to find C compiler`, which the gateway reported as an opaque 502. Added `build-essential` to the Dockerfile.
+- **`sacrebleu` 2.6.0 removed `BLEUScore.get_signature()`,** which crashed the benchmark *after* all 25 rows had translated. Rewritten to read the signature from the metric class, version-tolerantly.
+
+Also set `AI_EAGER_LOAD=true` in `.env`. The gateway's `AbortSignal.timeout(15_000)` cannot absorb a cold checkpoint load, so without eager loading the first request after every idle period reliably 503s. Kept `AI_INSTALL_ML=true` in the git-ignored `.env` so rebuilds stay inference-capable.
+
+Measured on the GTX 1650 Super at fp16, via `scripts/benchmark_translation.py` over the 25-row controlled set:
+
+| Direction | Rows | Cold load | Warm p50 | Warm p95 | VRAM | BLEU | chrF |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| en→or | 12/12 | 2.196s | 0.453s | 0.718s | 413.2 MB | 12.49 | 55.89 |
+| or→en | 13/13 | 44.087s | 0.365s | 0.453s | 413.2 MB | 71.78 | 78.40 |
+
+Warm latency is roughly 0.4s and a single resident checkpoint costs 413 MB, so the 4 GB card has wide headroom and the PRD's sub-3-second target is met with margin. Through the full browser path (nginx → gateway → AI) a request returns in 4.3s including the HTTP hop, and switching direction costs about 5s for the checkpoint swap, which stays inside both the 15s gateway and 30s nginx timeouts.
+
+The BLEU 12.49 for en→or is **not** a quality verdict and must not be read as one. It is 12 self-authored sentences, far too few for BLEU to mean anything; or→en scoring 71.78 against comparable references indicates the en→or references were less idiomatic rather than the output being worse. A defensible number needs the official FLORES-200 devtest set, which is recorded as follow-up work in `eval/README.md`.
+
+- Restricted speech-to-text to English and Odia via a `SPEECH_INPUT_LANGUAGES` allowlist. The microphone is disabled with an explanatory tooltip when Hindi is selected, and `toggleListening` re-checks so the restriction cannot be bypassed. Hindi remains fully available for typing, text-to-speech and transliteration.
+- Added same-language dictation: English→English and Odia→Odia now transcribe only and never reach the model, because `en:en` and `or:or` are not valid IndicTrans2 pairs and round-tripping correct text through the model could only corrupt it. `constrainPair` permits these while still rejecting Hindi→Hindi and the direct Odia↔Hindi pair that IndicTrans2 cannot serve without an English pivot. Applied to both the Translate tab and the conversation turn handler.
+- Added a "Write it in" target selector to the Speech-to-text tab so that tab alone can produce all four supported pairs instead of hardcoding the opposite language.
+- Fixed a mic feedback bug: recording state was `speechListening = target === 'speech'`, so dictating in the Translate or Conversation tab gave no visual indication that recording was active. Now tracked per target via `listeningTarget`.
+- Removed the false claim "Your words stay private on this device" from the Translate tab. Chrome and Edge stream microphone audio to Google's servers for recognition, so the sentence was untrue for the one feature a user would most assume was local. The status region now renders only when there is a real message, and the decorative star is conditional so no orphan glyph is left behind.
+- Added the authorship notice to the footer: "© 2026 Aniket Nayak · All rights reserved" and "Designed and developed by Aniket Nayak". Used a `div` rather than a `span` so the existing `.footer > span:last-child` rule does not shrink it to 8px, and replaced the dev-facing "LOCAL PREVIEW · PHASE 1" label to keep the footer from crowding.
+- Verified: FastAPI pytest 13/13; NestJS Jest 2/2; Angular tests 7/7 in Chrome 154; Angular production build clean. Translation confirmed end to end through nginx for both directions, and all four change markers confirmed present in the bundle actually served on port 4200 rather than only in source.
+
+Known gaps carried forward: the Speech-to-text tab still cannot transcribe Hindi; `hi` is offered for typing and translation but was never benchmarked; the footer notice is the only authorship marker, as `package.json` carries no `author` or `license` field and the README has no ownership statement; and the transliteration tool remains a seven-word lookup table rather than IndicXlit.
+
 ## 2026-10-03 — Desktop AI inference layer (built, awaiting gated checkpoints)
 
 Built the IndicTrans2 inference layer on the AI development desktop. No weights have been downloaded; the service still reports not-ready, which is the correct behaviour until Hugging Face access exists.
