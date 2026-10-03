@@ -8,7 +8,7 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 
 ## First pull from laptop
 
-1. After the laptop milestone is committed and pushed, use the agreed repository URL and branch to clone/pull this project on the desktop.
+1. Clone the repository or pull the pushed laptop milestone from `origin/main`.
 2. Check out the recorded commit and read [README.md](README.md), [TASKS.md](TASKS.md), [LAPTOP.md](LAPTOP.md), this file and the three supplied source documents before changing architecture.
 3. Install project dependencies using the repository lockfiles; do not install/download model weights into the repository.
 4. Verify API tests and the CPU-only/not-ready path before configuring GPU inference.
@@ -33,7 +33,7 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 
 ## Handoff record
 
-- Git remote: `https://github.com/sikunaniket1234/bharatvoice.git` (`origin`). Record the pushed commit hash after the laptop initial commit is pushed.
-- Branch: `main`.
+- Git remote: `https://github.com/sikunaniket1234/bharatvoice.git` (`origin`).
+- Branch: `main`; initial project commit: `9b3ee623eee7c9b850bd64aeed52ed38ef26cc5c`.
 - Desktop OS/driver/GPU runtime measurements: pending desktop inspection.
 - Model benchmark results: pending.

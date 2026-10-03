@@ -8,5 +8,6 @@
 - Checked local tool versions: Node.js 24.14.0, npm 11.11.1, Python 3.12.10, Docker CLI 29.3.1 and Docker Compose 5.1.1. Docker daemon readiness has not been verified.
 - Added FastAPI translation contract/provider boundary and NestJS validation/proxy gateway. No model weights are loaded; requests return explicit not-ready until desktop inference is implemented.
 - Validation passed: FastAPI pytest 4/4; NestJS build and Jest 2/2; npm audit 0 vulnerabilities.
-- Initialized the local `main` branch and configured `origin` as `https://github.com/sikunaniket1234/bharatvoice.git`; the initial laptop commit is the desktop handoff baseline.
+- Initialized the local `main` branch and configured `origin` as `https://github.com/sikunaniket1234/bharatvoice.git`.
+- Created and pushed the initial project commit `9b3ee623eee7c9b850bd64aeed52ed38ef26cc5c` (`chore: initial BharatVoice project foundation`) to `origin/main`.
 - Initial work is being tracked in [TASKS.md](TASKS.md); machine handoff steps are in [LAPTOP.md](LAPTOP.md) and [DESKTOP.md](DESKTOP.md).

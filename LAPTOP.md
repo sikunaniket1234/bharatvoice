@@ -45,7 +45,7 @@ Per the deployment plan, this Windows laptop (10th-gen i5, 12 GB RAM, no useful 
 
 ## Git handoff
 
-The repository is initialized on `main` and `origin` points to `https://github.com/sikunaniket1234/bharatvoice.git`. After reviewing `git status`, push the initial commit so the desktop can pull it. Do not commit secrets or downloaded checkpoints. Record the pushed commit in [DESKTOP.md](DESKTOP.md).
+The repository is initialized on `main`; `origin` points to `https://github.com/sikunaniket1234/bharatvoice.git`, and the initial project commit has been pushed. The desktop can pull `origin/main`. Do not commit secrets or downloaded checkpoints.
 
 ## Laptop completion checklist
 
@@ -54,4 +54,4 @@ The repository is initialized on `main` and `origin` points to `https://github.c
 - [ ] Build/migrate the Angular PWA and test it in a browser.
 - [x] Confirm NestJS/FastAPI contracts and expected not-ready behavior (the Angular UI connection remains open work).
 - [x] Review `.gitignore`, environment files and staged changes.
-- [ ] Push the initial commit to origin; update [HISTORY.md](HISTORY.md) and [TASKS.md](TASKS.md) with its hash.
+- [x] Push the initial commit to origin; record the handoff in [HISTORY.md](HISTORY.md) and [TASKS.md](TASKS.md).

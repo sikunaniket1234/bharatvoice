@@ -11,7 +11,7 @@ Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` wa
 - [x] Add API contract/unit tests; a missing model returns an explicit not-ready error, never fake a translation.
 - [ ] Migrate the HTML prototype into the Angular PWA and connect its translation flow to NestJS.
 - [x] Add local environment examples with safe non-secret defaults; keep actual secrets/model paths untracked.
-- [~] Push the reviewed initial commit to the configured GitHub remote so the desktop can pull it.
+- [x] Review, commit, and push the laptop foundation to the configured GitHub remote.
 
 ## Desktop — AI baseline (after laptop push)
 
