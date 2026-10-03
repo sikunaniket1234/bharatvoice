@@ -26,6 +26,28 @@ Three constraints shape this layer:
 
 Input is split on sentence boundaries, including the Devanagari and Odia danda, so the 5,000-character API contract does not silently truncate at the model's generation limit. `flash_attention_2` is deliberately not enabled because it has no supported Windows build.
 
+## Readiness means obtainable weights, not importable modules
+
+Importing torch proves the runtime exists. It says nothing about whether the checkpoint can be fetched, and both IndicTrans2 checkpoints are gated. An early version of this service reported `ready: true` on that basis and then returned HTTP 502 for every translation.
+
+Readiness therefore requires both:
+
+- the runtime imports and a usable device is present (`runtime_ready`), and
+- each checkpoint is either already in the local cache or passes a cheap
+  Hugging Face metadata request (`available` per checkpoint).
+
+The metadata probe never downloads weights and its result is cached briefly so
+`/ready` can be polled. A gated repository with no accepted token reports
+`ready: false` with a reason naming the model and the fix.
+
+## Inference runs in the Linux container
+
+`IndicTransToolkit` exposes `IndicProcessor` only as a compiled Cython extension
+and publishes no `win_amd64` wheel, so the ML extras are Linux/macOS only. The
+supported host is therefore the Docker `ai` service, which needs no compiler.
+The Windows virtualenv stays contract-only so the test suite remains fast and
+free of a multi-gigabyte native dependency.
+
 ## GPU isolation
 
 Only the `ai` service carries a GPU device reservation in Compose. The gateway, web tier, PostgreSQL and Redis run on CPU and RAM. Model weights live on a named volume, never in the repository or an image layer. The machine-learning extras are an opt-in build argument so a default build stays small and the service reports itself not-ready.

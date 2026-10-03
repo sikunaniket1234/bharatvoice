@@ -121,27 +121,46 @@ On Windows, PowerShell's default execution policy blocks `npm.ps1`. Use `npm.cmd
 
 ### Enable AI inference (desktop only)
 
-The contract, health and readiness endpoints all work without a machine-learning stack. To add real translation, install the extras:
+Inference runs in the Docker `ai` service, **not** in the Windows virtualenv. `IndicTransToolkit` provides `IndicProcessor` only as a compiled Cython extension and publishes no `win_amd64` wheel for any Python version, so it cannot be installed on Windows x86-64 without first installing the multi-gigabyte Microsoft C++ Build Tools. A `cp312` `manylinux_x86_64` wheel exists, so the container needs no compiler at all. The Windows `.venv` is deliberately kept contract-only.
+
+The contract, health and readiness endpoints all work without a machine-learning stack, so leaving `AI_INSTALL_ML` false is a valid state.
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r services/ai-fastapi/requirements-ml.txt
+$env:AI_INSTALL_ML = "true"
+docker compose up --build -d
 ```
 
-`transformers` is pinned below 5.0.0 because the IndicTrans2 model cards warn that the translation pipeline was removed in v5. `flash_attention_2` is intentionally not enabled: it has no supported Windows build.
+Confirm the runtime inside the container:
 
-Both checkpoints are **gated on Hugging Face**. Accept the conditions on these pages with your account, then supply a read token in `.env`:
+```powershell
+docker compose exec ai python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+```
+
+Both checkpoints are **gated on Hugging Face**. Accept the conditions on these pages with your account first:
 
 - <https://huggingface.co/ai4bharat/indictrans2-en-indic-dist-200M>
 - <https://huggingface.co/ai4bharat/indictrans2-indic-en-dist-200M>
 
-```dotenv
-HF_TOKEN=hf_...
-```
-
-Never commit a real token. Confirm the service agrees with `GET /ready`, then benchmark:
+Then supply a read token. Either store it once against the persistent model volume:
 
 ```powershell
-.\.venv\Scripts\python.exe services\ai-fastapi\scripts\benchmark_translation.py
+docker compose exec ai hf auth login
+```
+
+or put it in `.env` as `HF_TOKEN=hf_...` for Compose to pass through. Never commit a real token. The service accepts both `HF_TOKEN` and a token cached by `hf auth login`.
+
+Check what the service thinks before trusting it:
+
+```powershell
+docker compose exec ai python -c "import urllib.request,json; print(json.load(urllib.request.urlopen('http://127.0.0.1:8000/ready'))['provider'])"
+```
+
+`ready` is only true when the runtime imports **and** both checkpoints are obtainable, so a gated repo without an accepted token reports `ready: false` with an actionable reason instead of failing later with a 502.
+
+Then benchmark inside the container:
+
+```powershell
+docker compose exec ai python scripts/benchmark_translation.py
 ```
 
 Read [`services/ai-fastapi/eval/README.md`](services/ai-fastapi/eval/README.md) before treating any score as a quality verdict — the bundled reference set is self-authored and only valid as a regression signal.

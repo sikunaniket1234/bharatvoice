@@ -70,7 +70,12 @@ class IndicTrans2Provider(TranslationProvider):
 
     @property
     def is_ready(self) -> bool:
-        """Readiness requires both a usable device and a loadable checkpoint."""
+        """Readiness requires a usable runtime AND obtainable weights.
+
+        Checking only that torch imports would report "ready" on a machine that
+        cannot download the gated checkpoints, which is worse than useless: the
+        UI would offer translation and then receive a 502.
+        """
         if self._failure is not None:
             return False
         if not self._settings.is_torch_available():
@@ -81,25 +86,51 @@ class IndicTrans2Provider(TranslationProvider):
             import IndicTransToolkit  # noqa: F401
         except ImportError:
             return False
-        return True
+        return all(
+            self._manager.checkpoint_access(model_id)[0]
+            for model_id in self._settings.model_ids
+        )
 
     @property
     def status(self) -> dict[str, object]:
         settings = self._settings
+        runtime_ready = True
+        reason: str | None = self._failure
+        if not settings.is_torch_available():
+            runtime_ready = False
+            reason = f"No usable torch device for AI_DEVICE={settings.device!r}."
+        else:
+            try:
+                import torch  # noqa: F401
+                import transformers  # noqa: F401
+                import IndicTransToolkit  # noqa: F401
+            except ImportError as error:
+                runtime_ready = False
+                reason = f"Machine-learning extras are not installed: {type(error).__name__}."
+
+        checkpoints: dict[str, object] = {}
+        for role, model_id in (
+            ("en_indic", settings.en_indic_model),
+            ("indic_en", settings.indic_en_model),
+        ):
+            available, detail = self._manager.checkpoint_access(model_id)
+            checkpoints[role] = {
+                "model_id": model_id,
+                "available": available,
+                "detail": detail,
+                "license": MODEL_LICENSES.get(model_id, "unknown"),
+            }
+            if not available and reason is None:
+                reason = f"{model_id}: {detail}"
+
         return {
-            "ready": self.is_ready,
-            "reason": self._failure
-            or (
-                None
-                if self.is_ready
-                else "Machine-learning extras are not installed for the configured device."
-            ),
+            "ready": runtime_ready and all(c["available"] for c in checkpoints.values()),
+            "reason": reason,
+            "runtime_ready": runtime_ready,
             "device": settings.device,
             "dtype": settings.dtype,
-            "checkpoints": {
-                "en_indic": settings.en_indic_model,
-                "indic_en": settings.indic_en_model,
-            },
+            "hf_token_supplied": bool(settings.hf_token),
+            "checkpoints": checkpoints,
             "licenses": {
                 model_id: MODEL_LICENSES.get(model_id, "unknown")
                 for model_id in settings.model_ids

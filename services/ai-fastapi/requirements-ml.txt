@@ -4,17 +4,23 @@
 # unit tests keep running on machines that have no ML stack installed. Without
 # these packages the service starts normally and reports itself not-ready.
 #
-# Install the CUDA build with an explicit PyTorch index, for example:
+# IMPORTANT: this stack is Linux/macOS only. IndicTransToolkit ships
+# IndicProcessor only as a compiled Cython extension and publishes no
+# win_amd64 wheel for any Python version, so it cannot be installed on Windows
+# x86-64 without first installing the Microsoft C++ Build Tools and compiling
+# it from the sdist. A cp312 manylinux_x86_64 wheel does exist, so the intended
+# and supported path is the Docker `ai` service. The Windows virtualenv in this
+# repository is deliberately kept contract-only.
+#
+# The CUDA build is selected by the installer, not here:
 #   pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r requirements-ml.txt
-# The Windows driver on the development desktop reports CUDA 13.1, which is
-# backward compatible with the cu126/cu128 wheels.
 #
 # transformers is held below 5.0.0: the IndicTrans2 model cards state that the
 # "translation" pipeline was removed in transformers v5, and these checkpoints
 # are trust_remote_code models best matched to the 4.x line.
 #
-# flash_attention_2 is intentionally NOT enabled. It has no supported Windows
-# build, and the model cards say not to set it when flash-attn is unavailable.
+# flash_attention_2 is intentionally NOT enabled. The model cards say not to
+# set it when flash-attn is unavailable, and it has no supported Windows build.
 
 torch>=2.6,<3.0
 transformers>=4.44,<5.0
@@ -25,7 +31,11 @@ huggingface_hub>=0.27
 
 # Required by the IndicTrans2 model cards for normalisation and postprocessing:
 #   from IndicTransToolkit.processor import IndicProcessor
+# Linux/macOS wheels only. See the note above.
 IndicTransToolkit==1.1.1
 
 # Evaluation metrics for the controlled bilingual benchmark set.
 sacrebleu>=2.4.0
+
+# Optional, but the benchmark script reports process RSS when it is present.
+psutil>=5.9

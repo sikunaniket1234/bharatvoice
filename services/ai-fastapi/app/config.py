@@ -95,6 +95,26 @@ def _resolve_device(requested: str) -> str:
     return "cuda" if torch.cuda.is_available() else "cpu"
 
 
+def resolve_token() -> str | None:
+    """Find a Hugging Face token without ever logging it.
+
+    Prefers the HF_TOKEN environment variable so a secret can stay out of the
+    Hugging Face cache, but falls back to `hf auth login`, which is the
+    convenient path for an interactive developer.
+    """
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if token and token.strip():
+        return token.strip()
+    try:
+        from huggingface_hub import get_token
+    except ImportError:
+        return None
+    try:
+        return get_token()
+    except Exception:
+        return None
+
+
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     cache_dir = _env("HF_HOME", "")
@@ -110,7 +130,7 @@ def get_settings() -> Settings:
         eager_load=_env_bool("AI_EAGER_LOAD", False),
         keep_resident=_env_bool("AI_KEEP_MODEL_RESIDENT", True),
         hf_cache_dir=Path(cache_dir) if cache_dir else None,
-        hf_token=os.environ.get("HF_TOKEN") or None,
+        hf_token=resolve_token(),
         trust_remote_code=_env_bool("AI_TRUST_REMOTE_CODE", True),
     )
 

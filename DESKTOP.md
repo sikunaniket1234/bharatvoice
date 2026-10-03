@@ -27,7 +27,6 @@ Inspected directly on this desktop. These replace the previous "pending desktop 
 | Git | `2.55.0.windows.3`, branch `main`, remote `origin` |
 
 The measured hardware matches the deployment plan's Profile B exactly. The one deviation is the host OS: it is Windows 11 Pro, not Ubuntu Server 24.04 LTS.
-
 ## Environment deviations that affect the AI milestone
 
 1. **Windows, not Ubuntu — but GPU-in-Docker already works.** The deployment plan's step of installing the NVIDIA Container Toolkit is a Linux-host step and is **not required here**. Docker Desktop's WSL2 backend already passes the Windows driver through to Linux containers. Verified on this machine:
@@ -39,12 +38,27 @@ The measured hardware matches the deployment plan's Profile B exactly. The one d
    The container reported `NVIDIA GeForce GTX 1650 SUPER`, driver `591.86`, CUDA `13.1`, `4096 MiB` total VRAM with `916 MiB` already used by the desktop. No toolkit installation was performed.
 
    This means the `ai` service can be the only GPU consumer by adding a device reservation to its Compose service, and the gateway/web/PostgreSQL/Redis stay on CPU exactly as the plan requires.
-2. **`flash_attention_2` is unavailable on Windows.** The IndicTrans2 model cards recommend `attn_implementation="flash_attention_2"`, and explicitly say not to set it when flash-attn is absent. Do not set it in the Windows virtualenv; use the default attention implementation.
-3. **Both IndicTrans2 200M checkpoints are gated on Hugging Face.** `ai4bharat/indictrans2-en-indic-dist-200M` and `ai4bharat/indictrans2-indic-en-dist-200M` report `gated: "auto"` from the Hub API, and an unauthenticated `resolve/main/config.json` request returns **HTTP 401**. This needs a Hugging Face account, accepting the repository conditions on both model pages, and a read `HF_TOKEN` supplied through the environment. It is an external account step that cannot be completed from the repository, and it currently blocks every model benchmark.
-4. **`IndicTransToolkit` is a real PyPI dependency.** The model cards import `from IndicTransToolkit.processor import IndicProcessor`; the package is published as `IndicTransToolkit` (1.1.1). It performs the normalise/romanise and postprocess steps and must not be skipped.
-5. **Pin `transformers` below 5.0.0.** Both model cards warn that the `translation` pipeline was removed in transformers v5. These checkpoints are also `trust_remote_code` models, which are best matched to the 4.x line.
+
+2. **Inference must run in the Linux container, not the Windows virtualenv.** `IndicTransToolkit` supplies `IndicProcessor` only as a compiled Cython extension (`processor.pyx`, no pure-Python equivalent) and publishes **no `win_amd64` wheel for any Python version** — only `manylinux`, `musllinux` and `macosx_11_0_arm64`. A `cp312` `manylinux_x86_64` wheel does exist.
+
+   Consequences:
+   - `pip install -r requirements-ml.txt` fails on Windows with `Microsoft Visual C++ 14.0 or greater is required`.
+   - Installing the Microsoft C++ Build Tools would make it compile, at the cost of a multi-gigabyte native toolchain on the host. **Not recommended.**
+   - The supported path is the Docker `ai` service, which needs no compiler. This also matches the deployment plan, where the AI service is a container.
+
+   Verified working in the built image: `torch 2.14.1+cu130`, `torch.cuda.is_available() == True`, device `NVIDIA GeForce GTX 1650 SUPER`, `transformers 4.57.6`, and `IndicTransToolkit.processor.IndicProcessor` importing cleanly.
+
+   The Windows `.venv` is therefore kept contract-only. Do not try to add the ML extras to it.
+
+3. **Readiness must verify weights, not just imports.** An early version reported `ready: true` because torch, transformers and IndicTransToolkit all imported, while every translation returned HTTP 502 because the gated checkpoints could not be downloaded. Readiness now probes the local cache and then makes a cheap Hugging Face metadata request, and reports `ready: false` with an actionable reason when a checkpoint is gated and no token has been supplied.
+
+4. **`flash_attention_2` is unavailable on Windows.** The IndicTrans2 model cards recommend `attn_implementation="flash_attention_2"`, and explicitly say not to set it when flash-attn is absent. It is not set anywhere in this project.
+
+5. **`transformers` is pinned below 5.0.0.** Both model cards warn that the `translation` pipeline was removed in transformers v5. These checkpoints are also `trust_remote_code` models, which are best matched to the 4.x line.
+
 6. **PowerShell blocks `npm.ps1`.** The execution policy is `Restricted` on this host, so run `npm.cmd` (not `npm`) or the call fails before npm starts.
-7. **npm requires install-script approval.** Five transitive dev packages (`@parcel/watcher`, `esbuild`, `lmdb`, `msgpackr-extract`, `unrs-resolver`) need `npm approve-scripts` before the Angular build works.
+
+7. **npm requires install-script approval.** Five transitive dev packages (`@parcel/watcher`, `esbuild`, `lmdb`, `msgpackr-extract`, `unrs-resolver`) needed approval before the Angular build worked. The approved list is now recorded in `package.json`, so this only bites on an npm version that ignores it.
 
 ## Toolchain bug found and fixed on first pull
 

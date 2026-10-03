@@ -23,6 +23,8 @@ from app.config import Settings, get_settings, torch_dtype
 
 logger = logging.getLogger(__name__)
 
+ACCESS_CACHE_TTL_SECONDS = 60
+
 
 @dataclass
 class ModelStats:
@@ -69,6 +71,7 @@ class ModelManager:
         self._tokenizer: Any = None
         self._processor: Any = None
         self._resident_model_id: str | None = None
+        self._access_cache: dict[str, tuple[float, bool, str]] = {}
         self.stats = ModelStats()
 
     @property
@@ -103,6 +106,59 @@ class ModelManager:
     @property
     def settings(self) -> Settings:
         return self._settings
+
+    def checkpoint_access(self, model_id: str) -> tuple[bool, str]:
+        """Can this checkpoint actually be served right now?
+
+        Importing torch is not enough to answer that. A gated repository with no
+        accepted token still imports fine and then fails on the first download,
+        so readiness must distinguish "runtime present" from "weights
+        obtainable". This checks the local cache first and otherwise makes a
+        cheap metadata request; it never downloads weights.
+        """
+        cached = self._access_cache.get(model_id)
+        if cached and time.monotonic() - cached[0] < ACCESS_CACHE_TTL_SECONDS:
+            return cached[1], cached[2]
+
+        available, detail = self._probe_checkpoint(model_id)
+        self._access_cache[model_id] = (time.monotonic(), available, detail)
+        return available, detail
+
+    def _probe_checkpoint(self, model_id: str) -> tuple[bool, str]:
+        try:
+            from huggingface_hub import model_info, try_to_load_from_cache
+        except ImportError:
+            return False, "huggingface_hub is not installed."
+
+        try:
+            hit = try_to_load_from_cache(model_id, "config.json", token=self._settings.hf_token)
+            if isinstance(hit, str):
+                return True, "cached"
+        except Exception:
+            logger.debug("cache probe failed for %s", model_id, exc_info=True)
+
+        try:
+            info = model_info(model_id, token=self._settings.hf_token)
+        except Exception as error:
+            name = type(error).__name__
+            if "GatedRepo" in name:
+                if not self._settings.hf_token:
+                    return False, (
+                        "Checkpoint is gated and no HF_TOKEN is set. Accept the model "
+                        "conditions on the Hugging Face page, then supply a read token."
+                    )
+                return False, (
+                    "Hugging Face refused the supplied token for this gated checkpoint. "
+                    "Confirm the conditions were accepted with the same account."
+                )
+            return False, f"Hugging Face metadata request failed: {name}"
+
+        if getattr(info, "gated", False) and not self._settings.hf_token:
+            return False, (
+                "Checkpoint is gated and no HF_TOKEN is set. Accept the model "
+                "conditions on the Hugging Face page, then supply a read token."
+            )
+        return True, f"downloadable ({getattr(info, 'sha', 'unknown revision')[:12]})"
 
     def _load(self, model_id: str) -> None:
         import torch
