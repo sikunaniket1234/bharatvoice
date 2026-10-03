@@ -16,13 +16,17 @@ Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` wa
 - [x] Complete the Angular PWA and local Docker Compose implementation; validate browser-to-gateway-to-AI behavior.
 - [x] Commit and push the completed laptop implementation so the desktop can pull it.
 - [ ] Review and resolve remaining frontend build/test toolchain advisories (runtime production dependency audit is clean).
+- [x] Fix the NestJS/Jest type collision where hoisted `@types/jasmine` shadowed Jest's `expect` and broke `api:test`.
 
 ## Desktop — AI baseline (after laptop push)
 
-- [ ] Pull the agreed branch and confirm the repository instructions match the desktop OS.
-- [ ] Record OS, driver, CUDA/container support, free disk, RAM and available VRAM before installing AI dependencies.
-- [ ] Prepare a private development environment; install NVIDIA driver/Container Toolkit only if the host OS/runtime requires them.
-- [ ] Implement and benchmark IndicTrans2 distilled 200M English → Indic for Odia first.
+- [x] Pull the agreed branch and confirm the repository instructions match the desktop OS.
+- [x] Record OS, driver, CUDA/container support, free disk, RAM and available VRAM before installing AI dependencies.
+- [x] Re-run the full laptop baseline on the desktop (API build/tests, Angular tests, FastAPI pytest, Compose stack, 503 not-ready path).
+- [x] Verify GPU-in-Docker passthrough: Docker Desktop's WSL2 backend exposes the GTX 1650 Super to Linux containers via `--gpus all`. No NVIDIA Container Toolkit installation is required on this Windows host.
+- [~] Obtain Hugging Face access to the gated `indictrans2-en-indic-dist-200M` and `indictrans2-indic-en-dist-200M` checkpoints (account + accepted conditions + `HF_TOKEN`). External step.
+- [ ] Add PyTorch (CUDA), `transformers<5.0.0`, `IndicTransToolkit` and `sacrebleu` to the AI requirements; keep the AI service as the only GPU consumer.
+- [ ] Implement and benchmark IndicTrans2 distilled 200M English → Odia first.
 - [ ] Add Indic → English, then verify English ↔ Hindi through the same provider architecture.
 - [ ] Add controlled evaluation examples and record latency, memory use, model version and license.
 - [ ] Keep model files out of Git and load/unload models rather than keeping every model resident on the 4 GB GPU.

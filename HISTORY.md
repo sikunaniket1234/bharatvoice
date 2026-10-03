@@ -1,5 +1,18 @@
 # Project history
 
+## 2026-10-03 — Desktop first pull and baseline verification
+
+- Cloned `origin/main` fresh on the AI development desktop at commit `bc82f1b` and read the repository docs plus all three supplied source documents.
+- Confirmed the desktop is Hardware Profile B from the deployment plan: i5-11400, 15.87 GiB RAM, GTX 1650 Super with 4.00 GiB VRAM. Recorded the full measured environment table in [DESKTOP.md](DESKTOP.md), replacing the previous "pending inspection" status.
+- The host OS is Windows 11 Pro `10.0.26200`, not Ubuntu Server 24.04 LTS. Recorded the seven environment deviations that affect inference, including absent `flash_attention_2`, PowerShell blocking `npm.ps1`, gated Hugging Face checkpoints, and the `transformers<5.0.0` pin requirement.
+- Installed Python 3.12.10 to satisfy the documented `py -3.12` workflow; 3.14.7 and 3.10 were already present.
+- Found and fixed a latent monorepo type-collision bug: `apps/api-nestjs/tsconfig.json` had no `types` restriction, so the Angular workspace's hoisted `@types/jasmine` shadowed Jest's `expect` and `npm run api:test` failed with `TS2339: Property 'rejects' does not exist`. Fixed with `"types": ["node", "jest"]`.
+- Recorded the five npm install-script approvals (`@parcel/watcher`, `esbuild`, `lmdb`, `msgpackr-extract`, `unrs-resolver`) in `package.json` `allowScripts` so the Angular build is reproducible without a manual approval step.
+- Verified the laptop baseline on the desktop: FastAPI pytest 4/4; NestJS build and Jest 2/2; Angular tests 3/3 in Chrome 154.
+- Brought up the Docker Compose stack: web, gateway and AI containers all up with `ai` healthy. Web HTTP 200, gateway health HTTP 200, FastAPI `/health` HTTP 200 from inside the network, `/ready` HTTP 503 `translation_provider_not_ready`, and gateway translation HTTP 503. Confirmed FastAPI is not published to a host port.
+- Confirmed `IndicTransToolkit` 1.1.1 is the real PyPI package required by the IndicTrans2 model cards, and that both 200M checkpoints are gated on Hugging Face. The AI baseline is now blocked on external Hugging Face access.
+- No model weights were downloaded. Nothing has been committed or pushed yet.
+
 ## 2026-10-03 — Initial laptop review
 
 - Reviewed the Phase 1 PRD, AI technical documentation, server/deployment documentation, and standalone HTML prototype.

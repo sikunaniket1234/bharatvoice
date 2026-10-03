@@ -12,5 +12,12 @@
     "web:dev": "npm --workspace apps/web-angular run start -- --host 127.0.0.1",
     "web:build": "npm --workspace apps/web-angular run build",
     "web:test": "npm --workspace apps/web-angular run test -- --watch=false"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true,
+    "esbuild@0.28.1": true,
+    "lmdb@3.4.2": true,
+    "msgpackr-extract@3.0.4": true,
+    "unrs-resolver@1.12.2": true
   }
 }

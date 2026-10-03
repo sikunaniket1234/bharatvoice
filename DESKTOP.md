@@ -4,7 +4,57 @@
 
 The deployment plan identifies the developer desktop (Intel i5-11400, 16 GB RAM, NVIDIA GTX 1650 Super with 4 GB VRAM) as the primary AI development/inference machine. Keep PostgreSQL, Redis, NestJS and other non-AI services on CPU/RAM. Give GPU access only to the AI service when the host/container runtime is correctly configured.
 
-Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can be used for development. The desktop OS, driver, CUDA/container runtime, free disk space and actual GPU availability have not been inspected from this laptop session. Confirm those facts before running OS-specific install commands.
+Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can be used for development. This desktop is currently running Windows, so treat the measurements below as development-environment facts, not as a validated deployment-host configuration.
+
+## Measured machine facts (recorded 2026-10-03)
+
+Inspected directly on this desktop. These replace the previous "pending desktop inspection" status.
+
+| Item | Measured value |
+| --- | --- |
+| OS | Windows 11 Pro, version `10.0.26200`, 64-bit |
+| CPU | Intel Core i5-11400 @ 2.60 GHz, 6 cores / 12 logical processors |
+| RAM | 15.87 GiB total; 5.63 GiB free at time of measurement |
+| GPU | NVIDIA GeForce GTX 1650 SUPER, 4.00 GiB VRAM |
+| VRAM in use at measurement | 1058 MiB resident (desktop/Chrome/WhatsApp/Edge), leaving roughly 3.0 GiB available to a model |
+| NVIDIA driver | `591.86` (Windows driver version `32.0.15.9186`), driver date 2026-01-20 |
+| CUDA version reported by `nvidia-smi` | `13.1` |
+| GPU state | WDDM display mode, Compute mode `Default`, 46 °C, P8 idle at 9 W of a 100 W limit |
+| Free disk | C: 268 GB, D: 447 GB, E: 1072 GB, F: 111 GB, G: 74 GB, J: 25 GB, K: 148 GB, L: 97 GB |
+| Node.js / npm | Node `v24.18.0`, npm `11.16.0` |
+| Python | `3.12.10` installed for this milestone; `3.14.7` and `3.10` also present |
+| Docker | Docker Desktop on WSL2; CLI `29.7.2`, Compose `v5.4.0`, daemon verified reporting `linux` / `29.7.2` |
+| Git | `2.55.0.windows.3`, branch `main`, remote `origin` |
+
+The measured hardware matches the deployment plan's Profile B exactly. The one deviation is the host OS: it is Windows 11 Pro, not Ubuntu Server 24.04 LTS.
+
+## Environment deviations that affect the AI milestone
+
+1. **Windows, not Ubuntu — but GPU-in-Docker already works.** The deployment plan's step of installing the NVIDIA Container Toolkit is a Linux-host step and is **not required here**. Docker Desktop's WSL2 backend already passes the Windows driver through to Linux containers. Verified on this machine:
+
+   ```powershell
+   docker run --rm --gpus all nvidia/cuda:12.6.3-base-ubuntu22.04 nvidia-smi
+   ```
+
+   The container reported `NVIDIA GeForce GTX 1650 SUPER`, driver `591.86`, CUDA `13.1`, `4096 MiB` total VRAM with `916 MiB` already used by the desktop. No toolkit installation was performed.
+
+   This means the `ai` service can be the only GPU consumer by adding a device reservation to its Compose service, and the gateway/web/PostgreSQL/Redis stay on CPU exactly as the plan requires.
+2. **`flash_attention_2` is unavailable on Windows.** The IndicTrans2 model cards recommend `attn_implementation="flash_attention_2"`, and explicitly say not to set it when flash-attn is absent. Do not set it in the Windows virtualenv; use the default attention implementation.
+3. **Both IndicTrans2 200M checkpoints are gated on Hugging Face.** `ai4bharat/indictrans2-en-indic-dist-200M` and `ai4bharat/indictrans2-indic-en-dist-200M` report `gated: "auto"` from the Hub API, and an unauthenticated `resolve/main/config.json` request returns **HTTP 401**. This needs a Hugging Face account, accepting the repository conditions on both model pages, and a read `HF_TOKEN` supplied through the environment. It is an external account step that cannot be completed from the repository, and it currently blocks every model benchmark.
+4. **`IndicTransToolkit` is a real PyPI dependency.** The model cards import `from IndicTransToolkit.processor import IndicProcessor`; the package is published as `IndicTransToolkit` (1.1.1). It performs the normalise/romanise and postprocess steps and must not be skipped.
+5. **Pin `transformers` below 5.0.0.** Both model cards warn that the `translation` pipeline was removed in transformers v5. These checkpoints are also `trust_remote_code` models, which are best matched to the 4.x line.
+6. **PowerShell blocks `npm.ps1`.** The execution policy is `Restricted` on this host, so run `npm.cmd` (not `npm`) or the call fails before npm starts.
+7. **npm requires install-script approval.** Five transitive dev packages (`@parcel/watcher`, `esbuild`, `lmdb`, `msgpackr-extract`, `unrs-resolver`) need `npm approve-scripts` before the Angular build works.
+
+## Toolchain bug found and fixed on first pull
+
+`apps/api-nestjs` had **no `types` restriction** in `tsconfig.json`, so TypeScript auto-included every hoisted `@types/*` package. The Angular workspace hoists `@types/jasmine` to the repository root, and its global `declare function expect<T>(actual: T): jasmine.Matchers<T>` shadowed Jest's `expect`, so `.rejects` did not exist and `npm run api:test` failed to compile:
+
+```
+TS2339: Property 'rejects' does not exist on type 'Matchers<Promise<TranslationResponseDto>>'.
+```
+
+Fixed by setting `"types": ["node", "jest"]` in `apps/api-nestjs/tsconfig.json`. This is a latent monorepo bug that would surface on any machine with the same hoisting layout, not a desktop-specific problem.
 
 ## First pull from laptop
 
@@ -13,6 +63,26 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 3. Install project dependencies using the repository lockfiles; do not install/download model weights into the repository.
 4. Verify API tests and the CPU-only/not-ready path before configuring GPU inference.
 5. Record the OS, NVIDIA driver, runtime/CUDA compatibility, free storage and GPU memory in this file once measured.
+
+## Baseline verification completed on this desktop (2026-10-03)
+
+Steps 1-5 above are done. The repository was cloned fresh at `bc82f1b`; Python 3.12.10 was installed to satisfy the documented `py -3.12` workflow; `npm approve-scripts` was granted for the five packages listed above.
+
+| Check | Result |
+| --- | --- |
+| `npm ci` | Installed; five install scripts approved |
+| `npm run api:build` | Pass |
+| `npm run api:test` | 2/2 pass (after the `types` fix above) |
+| `npm run web:test` | 3/3 pass, Chrome 154 headless |
+| `pytest services/ai-fastapi` | 4/4 pass |
+| `docker compose up --build -d` | All three services up; `ai` reports healthy |
+| `GET http://127.0.0.1:4200` | HTTP 200 |
+| `GET http://127.0.0.1:3000/api/v1/health` | HTTP 200 |
+| `GET /health` inside the `ai` container | HTTP 200 `{"status":"ok","service":"ai-fastapi"}` |
+| `GET /ready` inside the `ai` container | HTTP 503 `translation_provider_not_ready`, as designed |
+| `POST /api/v1/translation` via the gateway | HTTP 503, as designed |
+
+Confirmed: FastAPI is not published to a host port. It answers only from inside the Compose network, so `http://127.0.0.1:8000` on the host correctly refuses connections.
 
 ## Model milestone order
 
@@ -36,5 +106,6 @@ Ubuntu Server 24.04 LTS is the preferred long-term deployment host; Windows can 
 - Git remote: `https://github.com/sikunaniket1234/bharatvoice.git` (`origin`).
 - Branch: `main`; initial project commit: `9b3ee623eee7c9b850bd64aeed52ed38ef26cc5c`.
 - Latest laptop frontend/Compose implementation commit: `93e04ded58612dd880336780f35a0030c6b9b13f` (`feat: add BharatVoice Angular PWA and Docker stack`).
-- Desktop OS/driver/GPU runtime measurements: pending desktop inspection.
-- Model benchmark results: pending.
+- Desktop inspection commit: `bc82f1b` (`docs: update laptop completion and desktop handoff`) was the commit present at the first desktop pull.
+- Desktop OS/driver/GPU measurements: recorded above on 2026-10-03 (Windows 11 Pro, driver 591.86, CUDA 13.1, 4.00 GiB VRAM, 15.87 GiB RAM).
+- Model benchmark results: pending. Blocked on the gated Hugging Face checkpoints and on the unverified GPU-in-Docker path.
