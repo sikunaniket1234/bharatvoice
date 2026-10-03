@@ -23,13 +23,17 @@ Status key: `[x]` complete, `[~]` in progress, `[ ]` not started, `[blocked]` wa
 - [x] Pull the agreed branch and confirm the repository instructions match the desktop OS.
 - [x] Record OS, driver, CUDA/container support, free disk, RAM and available VRAM before installing AI dependencies.
 - [x] Re-run the full laptop baseline on the desktop (API build/tests, Angular tests, FastAPI pytest, Compose stack, 503 not-ready path).
-- [x] Verify GPU-in-Docker passthrough: Docker Desktop's WSL2 backend exposes the GTX 1650 Super to Linux containers via `--gpus all`. No NVIDIA Container Toolkit installation is required on this Windows host.
-- [~] Obtain Hugging Face access to the gated `indictrans2-en-indic-dist-200M` and `indictrans2-indic-en-dist-200M` checkpoints (account + accepted conditions + `HF_TOKEN`). External step.
-- [ ] Add PyTorch (CUDA), `transformers<5.0.0`, `IndicTransToolkit` and `sacrebleu` to the AI requirements; keep the AI service as the only GPU consumer.
-- [ ] Implement and benchmark IndicTrans2 distilled 200M English → Odia first.
-- [ ] Add Indic → English, then verify English ↔ Hindi through the same provider architecture.
-- [ ] Add controlled evaluation examples and record latency, memory use, model version and license.
-- [ ] Keep model files out of Git and load/unload models rather than keeping every model resident on the 4 GB GPU.
+- [ ] Verify GPU-in-Docker passthrough: Docker Desktop's WSL2 backend exposes the GTX 1650 Super to Linux containers via `--gpus all`. No NVIDIA Container Toolkit installation is required on this Windows host.
+- [x] Add a GPU device reservation to the `ai` Compose service only; gateway and web verified to have none.
+- [~] Obtain Hugging Face access to the gated `indictrans2-en-indic-dist-200M` and `indictrans2-indic-en-dist-200M` checkpoints (account + accepted conditions + `HF_TOKEN`). External step; code is built and waiting on it.
+- [x] Add `requirements-ml.txt` with `torch`, `transformers<5.0.0`, `IndicTransToolkit`, `sentencepiece`, `sacremoses`, `accelerate`, `huggingface_hub` and `sacrebleu`, as an opt-in Docker build argument.
+- [x] Implement the environment-driven settings module, the single-resident-model lifecycle manager, and the real IndicTrans2 provider with sentence-aware chunking.
+- [ ] Install the ML extras on this desktop and run the first real translation.
+- [ ] Benchmark en->or: cold start, warm latency, RAM/VRAM; record in DESKTOP.md.
+- [ ] Add or->en and verify en<->hi via indictrans2-indic-en-dist-200M.
+- [x] Add a controlled bilingual evaluation set with the name/location/date/code-mixed tags the technical docs require, plus a benchmark runner recording BLEU/chrF, latency, VRAM and license.
+- [ ] Human-review the Odia references and metrics before treating any score as a quality verdict; replace or supplement the smoke set with FLORES-200 devtest or IN22.
+- [x] Keep model files out of Git and load/unload models rather than keeping every model resident on the 4 GB GPU.
 
 ## Later Phase 1
 

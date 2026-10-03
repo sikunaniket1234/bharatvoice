@@ -1,5 +1,23 @@
 # Project history
 
+## 2026-10-03 — Desktop AI inference layer (built, awaiting gated checkpoints)
+
+Built the IndicTrans2 inference layer on the AI development desktop. No weights have been downloaded; the service still reports not-ready, which is the correct behaviour until Hugging Face access exists.
+
+- Added `app/config.py`: environment-driven settings for checkpoint ids, device, dtype, beam width, batch size, token limits and `HF_TOKEN`. Imports only the standard library, so nothing heavy is pulled in at startup.
+- Added `app/model_manager.py`: checkpoint lifecycle for a 4 GB card. Keeps at most one IndicTrans2 checkpoint resident, serialises inference behind a single asyncio lock, evicts before switching direction, optionally releases VRAM after each request, and tracks load time, latency and allocated/reserved VRAM.
+- Implemented `app/providers/indictrans2.py` against the AI4Bharat model cards: `IndicProcessor` preprocess/postprocess, fp16 generation with beam search, direction-based checkpoint selection, and sentence-aware chunking that respects Devanagari and Odia danda so the 5,000-character API contract does not silently truncate.
+- Recorded the model family and the checkpoint that actually served each request in `model_name` / `model_version`, and surfaced MIT license metadata on the readiness endpoint.
+- Added `requirements-ml.txt` and made the ML extras an opt-in Docker build argument, so a default build stays small. Pinned `transformers<5.0.0` per the model-card warning about the removed translation pipeline, and deliberately did not enable `flash_attention_2` because it has no supported Windows build.
+- Gave only the `ai` Compose service a GPU device reservation; confirmed by container inspect that the gateway and web services have none. Model weights go to a named volume, never the repository or an image layer.
+- Added `eval/phase1_smoke.jsonl`, a 49-row controlled set covering all four directions with the name, location, date and code-mixed tags the technical documentation requires, including the PRD's own `ମୁଁ ଆଜି office ଯିବିନି।` example.
+- Added `scripts/benchmark_translation.py`, which reports per-direction cold load, warm latency mean/p50/p95, VRAM, RAM, BLEU, chrF, checkpoint id and license, and exits non-zero on any error. `eval/README.md` states plainly that the references are self-authored and therefore usable only as a regression signal, not a quality verdict.
+- Made the readiness response actionable: 503 and ready responses now include a `provider` object with the failure reason, device, configured checkpoints and licenses. Inference failures now surface as HTTP 502 `translation_inference_failed` instead of a bare error.
+- Rewrote the FastAPI tests to be deterministic by injecting a fake provider, removing the previous dependency on PyTorch being absent. Added coverage for the response contract, the 502 path, FLORES code mapping, direction-to-checkpoint routing and chunking. 12/12 pass with no ML stack installed.
+- Verified: FastAPI pytest 12/12; Compose stack rebuilds and serves web 200, gateway 200, AI `/ready` 503 with provider detail, gateway translation 503.
+
+Still blocked on external Hugging Face access: both checkpoints report `gated: "auto"` and return HTTP 401 without a token.
+
 ## 2026-10-03 — Desktop first pull and baseline verification
 
 - Cloned `origin/main` fresh on the AI development desktop at commit `bc82f1b` and read the repository docs plus all three supplied source documents.

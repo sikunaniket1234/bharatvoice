@@ -42,9 +42,9 @@
 
 ## Current status
 
-- **FastAPI AI service:** health/readiness endpoints, validated Phase 1 translation schema, provider protocol, and an unconfigured IndicTrans2 provider boundary.
+- **FastAPI AI service:** health/readiness endpoints, validated Phase 1 translation schema, provider protocol, and an implemented IndicTrans2 distilled-200M provider with model lifecycle management.
 - **NestJS API:** local gateway, request validation, translation forwarding, and health endpoint.
-- **Translation models:** not downloaded or connected. Until the desktop inference milestone, valid translation calls return HTTP 503 with `translation_provider_not_ready`.
+- **Translation models:** the inference code path is complete but **no weights are downloaded yet**. Both IndicTrans2 checkpoints are gated on Hugging Face and return HTTP 401 without a token, so valid translation calls still return HTTP 503 `translation_provider_not_ready` with an actionable reason.
 - **Frontend:** Angular PWA with translation, speech tools, local history, conversation, transliteration preview, and light/dark themes; original prototype is retained as reference.
 - **Persistence/accounts, AI speech models, database, and public pilot:** not implemented. Docker Compose runs the local web, gateway, and AI API containers.
 
@@ -78,7 +78,12 @@ apps/
 	web-angular/         Angular PWA
 	api-nestjs/          NestJS application gateway
 services/
-	ai-fastapi/          FastAPI AI service and provider boundaries
+	ai-fastapi/          FastAPI AI service and providers
+		app/config.py            Environment-driven model/device settings
+		app/model_manager.py     Checkpoint load/unload for a small VRAM budget
+		app/providers/           TranslationProvider implementations
+		eval/                    Controlled bilingual evaluation set + reports
+		scripts/                 Benchmark runner
 docs/
 	api-contracts.md     Version 0.1 API behavior
 	architecture.md      Architecture and implementation constraints
@@ -112,6 +117,35 @@ py -3.12 -m venv .venv
 npm ci
 ```
 
+On Windows, PowerShell's default execution policy blocks `npm.ps1`. Use `npm.cmd` in place of `npm`. If `npm ci` reports packages with install scripts that are not yet approved, run `npm approve-scripts <pkg>` for `esbuild`, `@parcel/watcher`, `lmdb`, `msgpackr-extract` and `unrs-resolver`; the approved list is already recorded in `package.json`, so this is only needed on a fresh checkout with a different npm version.
+
+### Enable AI inference (desktop only)
+
+The contract, health and readiness endpoints all work without a machine-learning stack. To add real translation, install the extras:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r services/ai-fastapi/requirements-ml.txt
+```
+
+`transformers` is pinned below 5.0.0 because the IndicTrans2 model cards warn that the translation pipeline was removed in v5. `flash_attention_2` is intentionally not enabled: it has no supported Windows build.
+
+Both checkpoints are **gated on Hugging Face**. Accept the conditions on these pages with your account, then supply a read token in `.env`:
+
+- <https://huggingface.co/ai4bharat/indictrans2-en-indic-dist-200M>
+- <https://huggingface.co/ai4bharat/indictrans2-indic-en-dist-200M>
+
+```dotenv
+HF_TOKEN=hf_...
+```
+
+Never commit a real token. Confirm the service agrees with `GET /ready`, then benchmark:
+
+```powershell
+.\.venv\Scripts\python.exe services\ai-fastapi\scripts\benchmark_translation.py
+```
+
+Read [`services/ai-fastapi/eval/README.md`](services/ai-fastapi/eval/README.md) before treating any score as a quality verdict — the bundled reference set is self-authored and only valid as a regression signal.
+
 ### Start the Docker app
 
 Docker Desktop with Linux containers is running on this laptop. From the repository root, build and launch the web app and APIs:
@@ -133,7 +167,14 @@ docker compose down
 
 The web container serves a production build. Rebuild it after editing Angular files. The named Node modules volume persists between runs; `docker compose down -v` removes it and should only be used if you intend to discard that cache.
 
-Translation currently returns HTTP 503 `translation_provider_not_ready` until the desktop IndicTrans2 provider is implemented. This is expected; it prevents sample phrases from being presented as model output.
+Translation currently returns HTTP 503 `translation_provider_not_ready` until the desktop IndicTrans2 provider has its weights. This is expected; it prevents sample phrases from being presented as model output.
+
+Only the `ai` service receives a GPU device reservation, so the gateway and web tier stay on CPU and RAM. Model weights are kept on a named volume rather than in the repository or an image layer. The ML extras are an opt-in build argument, so a default build stays small:
+
+```powershell
+$env:AI_INSTALL_ML = "true"
+docker compose up --build -d
+```
 
 Optional local settings are documented in [.env.example](.env.example). NestJS loads the root `.env` when present. Never put real credentials, tokens, private audio, or model weights in committed files.
 

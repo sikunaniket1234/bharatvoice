@@ -1,0 +1,49 @@
+{"id": "en_or_01", "source_language": "en", "target_language": "or", "source_text": "Hello.", "reference_text": "ନମସ୍କାର।", "tags": ["greeting"]}
+{"id": "en_or_02", "source_language": "en", "target_language": "or", "source_text": "Thank you very much.", "reference_text": "ବହୁତ ଧନ୍ୟବାଦ।", "tags": ["greeting"]}
+{"id": "en_or_03", "source_language": "en", "target_language": "or", "source_text": "I will go to the office today.", "reference_text": "ମୁଁ ଆଜି ଅଫିସ୍ ଯିବିନି।", "tags": ["daily"]}
+{"id": "en_or_04", "source_language": "en", "target_language": "or", "source_text": "India is a very big country.", "reference_text": "ଭାରତ ଏକଟି ବହୁତ ବଡ ଦେଶ।", "tags": ["location"]}
+{"id": "en_or_05", "source_language": "en", "target_language": "or", "source_text": "I live in Bhubaneswar.", "reference_text": "ମୁଁ ଭୁବନେଶ୍ୱରରେ ବାସ କରେଉଛି।", "tags": ["location"]}
+{"id": "en_or_06", "source_language": "en", "target_language": "or", "source_text": "My name is Surendra.", "reference_text": "ମୋର ନାମ ସୁରେନ୍ଦ୍ର।", "tags": ["name"]}
+{"id": "en_or_07", "source_language": "en", "target_language": "or", "source_text": "The meeting is on 5 March 2026.", "reference_text": "ସଭା ୫ ମାର୍ଚ୍ଚ ୨୦୨୬ ରେ ଅଛି।", "tags": ["date"]}
+{"id": "en_or_08", "source_language": "en", "target_language": "or", "source_text": "Please send me the report.", "reference_text": "ଦୟାକରି ରିପୋର୍ଟଟୁ ମୋତେ ପଠାନ୍ତୁ।", "tags": ["daily"]}
+{"id": "en_or_09", "source_language": "en", "target_language": "or", "source_text": "The weather is very hot today.", "reference_text": "ଆଜି ପାଣି ବହୁତ ଗରମ ଅଛି।", "tags": ["daily"]}
+{"id": "en_or_10", "source_language": "en", "target_language": "or", "source_text": "I will send you an email.", "reference_text": "ମୁଁ ଆପଣଙ୍କୁ ଏକ ଇମେଇଲ ପଠାଇବି।", "tags": ["code-mixed-domain"]}
+{"id": "en_or_11", "source_language": "en", "target_language": "or", "source_text": "How much does this cost?", "reference_text": "ଏହାର ଦାମାଣ୍ଡ କେତେ?", "tags": ["daily"]}
+{"id": "en_or_12", "source_language": "en", "target_language": "or", "source_text": "See you tomorrow.", "reference_text": "ଆଜିକାଲି ଦେଖିବୁ।", "tags": ["greeting"]}
+{"id": "en_hi_01", "source_language": "en", "target_language": "hi", "source_text": "Hello.", "reference_text": "नमस्ते।", "tags": ["greeting"]}
+{"id": "en_hi_02", "source_language": "en", "target_language": "hi", "source_text": "Thank you very much.", "reference_text": "बहुत धन्यवाद।", "tags": ["greeting"]}
+{"id": "en_hi_03", "source_language": "en", "target_language": "hi", "source_text": "I will go to the office today.", "reference_text": "मैं आज ऑफिस जाऊंगा।", "tags": ["daily"]}
+{"id": "en_hi_04", "source_language": "en", "target_language": "hi", "source_text": "India is a very big country.", "reference_text": "भारत एक बहुत बड़ा देश है।", "tags": ["location"]}
+{"id": "en_hi_05", "source_language": "en", "target_language": "hi", "source_text": "I live in Bhubaneswar.", "reference_text": "मैं भुवनेश्वर में रहता हूँ।", "tags": ["location"]}
+{"id": "en_hi_06", "source_language": "en", "target_language": "hi", "source_text": "My name is Surendra.", "reference_text": "मेरा नाम सुरेंद्र है।", "tags": ["name"]}
+{"id": "en_hi_07", "source_language": "en", "target_language": "hi", "source_text": "The meeting is on 5 March 2026.", "reference_text": "बैठक 5 मार्च 2026 को है।", "tags": ["date"]}
+{"id": "en_hi_08", "source_language": "en", "target_language": "hi", "source_text": "Please send me the report.", "reference_text": "कृपया मुझे रिपोर्ट भेजिए।", "tags": ["daily"]}
+{"id": "en_hi_09", "source_language": "en", "target_language": "hi", "source_text": "The weather is very hot today.", "reference_text": "आज मौसम बहुत गर्म है।", "tags": ["daily"]}
+{"id": "en_hi_10", "source_language": "en", "target_language": "hi", "source_text": "I will send you an email.", "reference_text": "मैं आपको एक ईमेल भेजूँगा।", "tags": ["code-mixed-domain"]}
+{"id": "en_hi_11", "source_language": "en", "target_language": "hi", "source_text": "How much does this cost?", "reference_text": "इसकी कीमत कितनी है?", "tags": ["daily"]}
+{"id": "en_hi_12", "source_language": "en", "target_language": "hi", "source_text": "See you tomorrow.", "reference_text": "कल मिलते हैं।", "tags": ["greeting"]}
+{"id": "or_en_01", "source_language": "or", "target_language": "en", "source_text": "ନମସ୍କାର।", "reference_text": "Hello.", "tags": ["greeting"]}
+{"id": "or_en_02", "source_language": "or", "target_language": "en", "source_text": "ବହୁତ ଧନ୍ୟବାଦ।", "reference_text": "Thank you very much.", "tags": ["greeting"]}
+{"id": "or_en_03", "source_language": "or", "target_language": "en", "source_text": "ମୁଁ ଆଜି ଅଫିସ୍ ଯିବିନି।", "reference_text": "I will go to the office today.", "tags": ["daily"]}
+{"id": "or_en_04", "source_language": "or", "target_language": "en", "source_text": "ଭାରତ ଏକଟି ବହୁତ ବଡ ଦେଶ।", "reference_text": "India is a very big country.", "tags": ["location"]}
+{"id": "or_en_05", "source_language": "or", "target_language": "en", "source_text": "ମୁଁ ଭୁବନେଶ୍ୱରରେ ବାସ କରେଉଛି।", "reference_text": "I live in Bhubaneswar.", "tags": ["location"]}
+{"id": "or_en_06", "source_language": "or", "target_language": "en", "source_text": "ମୋର ନାମ ସୁରେନ୍ଦ୍ର।", "reference_text": "My name is Surendra.", "tags": ["name"]}
+{"id": "or_en_07", "source_language": "or", "target_language": "en", "source_text": "ସଭା ୫ ମାର୍ଚ୍ଚ ୨୦୨୬ ରେ ଅଛି।", "reference_text": "The meeting is on 5 March 2026.", "tags": ["date"]}
+{"id": "or_en_08", "source_language": "or", "target_language": "en", "source_text": "ଦୟାକରି ରିପୋର୍ଟଟୁ ମୋତେ ପଠାନ୍ତୁ।", "reference_text": "Please send me the report.", "tags": ["daily"]}
+{"id": "or_en_09", "source_language": "or", "target_language": "en", "source_text": "ଆଜି ପାଣି ବହୁତ ଗରମ ଅଛି।", "reference_text": "The weather is very hot today.", "tags": ["daily"]}
+{"id": "or_en_10", "source_language": "or", "target_language": "en", "source_text": "ମୁଁ ଆପଣଙ୍କୁ ଏକ ଇମେଇଲ ପଠାଇବି।", "reference_text": "I will send you an email.", "tags": ["code-mixed-domain"]}
+{"id": "or_en_11", "source_language": "or", "target_language": "en", "source_text": "ଏହାର ଦାମାଣ୍ଡ କେତେ?", "reference_text": "How much does this cost?", "tags": ["daily"]}
+{"id": "or_en_12", "source_language": "or", "target_language": "en", "source_text": "ଆଜିକାଲି ଦେଖିବୁ।", "reference_text": "See you tomorrow.", "tags": ["greeting"]}
+{"id": "or_en_13", "source_language": "or", "target_language": "en", "source_text": "ମୁଁ ଆଜି office ଯିବିନି।", "reference_text": "I will go to the office today.", "tags": ["code-mixed", "regression"]}
+{"id": "hi_en_01", "source_language": "hi", "target_language": "en", "source_text": "नमस्ते।", "reference_text": "Hello.", "tags": ["greeting"]}
+{"id": "hi_en_02", "source_language": "hi", "target_language": "en", "source_text": "बहुत धन्यवाद।", "reference_text": "Thank you very much.", "tags": ["greeting"]}
+{"id": "hi_en_03", "source_language": "hi", "target_language": "en", "source_text": "मैं आज ऑफिस जाऊंगा।", "reference_text": "I will go to the office today.", "tags": ["daily"]}
+{"id": "hi_en_04", "source_language": "hi", "target_language": "en", "source_text": "भारत एक बहुत बड़ा देश है।", "reference_text": "India is a very big country.", "tags": ["location"]}
+{"id": "hi_en_05", "source_language": "hi", "target_language": "en", "source_text": "मैं भुवनेश्वर में रहता हूँ।", "reference_text": "I live in Bhubaneswar.", "tags": ["location"]}
+{"id": "hi_en_06", "source_language": "hi", "target_language": "en", "source_text": "मेरा नाम सुरेंद्र है।", "reference_text": "My name is Surendra.", "tags": ["name"]}
+{"id": "hi_en_07", "source_language": "hi", "target_language": "en", "source_text": "बैठक 5 मार्च 2026 को है।", "reference_text": "The meeting is on 5 March 2026.", "tags": ["date"]}
+{"id": "hi_en_08", "source_language": "hi", "target_language": "en", "source_text": "कृपया मुझे रिपोर्ट भेजिए।", "reference_text": "Please send me the report.", "tags": ["daily"]}
+{"id": "hi_en_09", "source_language": "hi", "target_language": "en", "source_text": "आज मौसम बहुत गर्म है।", "reference_text": "The weather is very hot today.", "tags": ["daily"]}
+{"id": "hi_en_10", "source_language": "hi", "target_language": "en", "source_text": "मैं आपको एक ईमेल भेजूँगा।", "reference_text": "I will send you an email.", "tags": ["code-mixed-domain"]}
+{"id": "hi_en_11", "source_language": "hi", "target_language": "en", "source_text": "इसकी कीमत कितनी है?", "reference_text": "How much does this cost?", "tags": ["daily"]}
+{"id": "hi_en_12", "source_language": "hi", "target_language": "en", "source_text": "कल मिलते हैं।", "reference_text": "See you tomorrow.", "tags": ["greeting"]}

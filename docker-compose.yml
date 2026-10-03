@@ -4,13 +4,38 @@ services:
     build:
       context: .
       dockerfile: services/ai-fastapi/Dockerfile
+      args:
+        # Set to true to build an inference-capable image with the
+        # machine-learning extras. Left false so a default build stays small;
+        # the service still starts and reports itself not-ready.
+        INSTALL_ML: ${AI_INSTALL_ML:-false}
+        TORCH_INDEX_URL: ${AI_TORCH_INDEX_URL:-https://download.pytorch.org/whl/cu128}
     environment:
       PYTHONPATH: /workspace/services/ai-fastapi
+      AI_DEVICE: ${AI_DEVICE:-auto}
+      AI_DTYPE: ${AI_DTYPE:-float16}
+      AI_TRANSLATION_MODEL_EN_INDIC: ${AI_TRANSLATION_MODEL_EN_INDIC:-ai4bharat/indictrans2-en-indic-dist-200M}
+      AI_TRANSLATION_MODEL_INDIC_EN: ${AI_TRANSLATION_MODEL_INDIC_EN:-ai4bharat/indictrans2-indic-en-dist-200M}
+      AI_EAGER_LOAD: ${AI_EAGER_LOAD:-false}
+      AI_KEEP_MODEL_RESIDENT: ${AI_KEEP_MODEL_RESIDENT:-true}
+      HF_TOKEN: ${HF_TOKEN:-}
     command: uvicorn app.main:app --app-dir /workspace/services/ai-fastapi --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./services/ai-fastapi:/workspace/services/ai-fastapi
+      # Model cache lives on a named volume so checkpoints are never written
+      # into the repository or the image layer.
+      - ai_model_cache:/root/.cache/huggingface
     expose:
       - "8000"
+    # The AI service is the only service with GPU access. The gateway, web tier,
+    # PostgreSQL and Redis stay on CPU/RAM, as the deployment plan requires.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 10s
@@ -48,3 +73,4 @@ services:
 
 volumes:
   api_node_modules:
+  ai_model_cache:

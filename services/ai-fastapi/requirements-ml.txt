@@ -1,0 +1,31 @@
+# Machine-learning extras for BharatVoice AI inference.
+#
+# Kept separate from requirements.txt so the API contract, health endpoints and
+# unit tests keep running on machines that have no ML stack installed. Without
+# these packages the service starts normally and reports itself not-ready.
+#
+# Install the CUDA build with an explicit PyTorch index, for example:
+#   pip install --extra-index-url https://download.pytorch.org/whl/cu128 -r requirements-ml.txt
+# The Windows driver on the development desktop reports CUDA 13.1, which is
+# backward compatible with the cu126/cu128 wheels.
+#
+# transformers is held below 5.0.0: the IndicTrans2 model cards state that the
+# "translation" pipeline was removed in transformers v5, and these checkpoints
+# are trust_remote_code models best matched to the 4.x line.
+#
+# flash_attention_2 is intentionally NOT enabled. It has no supported Windows
+# build, and the model cards say not to set it when flash-attn is unavailable.
+
+torch>=2.6,<3.0
+transformers>=4.44,<5.0
+sentencepiece>=0.2.0
+sacremoses>=0.1.1
+accelerate>=0.34
+huggingface_hub>=0.27
+
+# Required by the IndicTrans2 model cards for normalisation and postprocessing:
+#   from IndicTransToolkit.processor import IndicProcessor
+IndicTransToolkit==1.1.1
+
+# Evaluation metrics for the controlled bilingual benchmark set.
+sacrebleu>=2.4.0

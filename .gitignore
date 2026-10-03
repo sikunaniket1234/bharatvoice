@@ -34,6 +34,9 @@ model-cache/
 *.mp3
 *.flac
 
+# Generated benchmark output; record reports deliberately as milestones instead
+services/ai-fastapi/eval/reports/
+
 # Local databases and runtime logs
 *.sqlite3
 *.db
